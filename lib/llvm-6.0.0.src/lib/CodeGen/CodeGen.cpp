@@ -103,6 +103,6 @@ void llvm::initializeCodeGen(PassRegistry &Registry) {
   initializeMIRCanonicalizerPass(Registry);
 }
 
-void LLVMInitializeCodeGen(LLVMPassRegistryRef R) {
+void LLVM_STDCALL LLVMInitializeCodeGen(LLVMPassRegistryRef R) {
   initializeCodeGen(*unwrap(R));
 }

@@ -83,15 +83,15 @@ void llvm::initializeAnalysis(PassRegistry &Registry) {
   initializeMemorySSAPrinterLegacyPassPass(Registry);
 }
 
-void LLVMInitializeAnalysis(LLVMPassRegistryRef R) {
+void LLVM_STDCALL LLVMInitializeAnalysis(LLVMPassRegistryRef R) {
   initializeAnalysis(*unwrap(R));
 }
 
-void LLVMInitializeIPA(LLVMPassRegistryRef R) {
+void LLVM_STDCALL LLVMInitializeIPA(LLVMPassRegistryRef R) {
   initializeAnalysis(*unwrap(R));
 }
 
-LLVMBool LLVMVerifyModule(LLVMModuleRef M, LLVMVerifierFailureAction Action,
+LLVMBool LLVM_STDCALL LLVMVerifyModule(LLVMModuleRef M, LLVMVerifierFailureAction Action,
                           char **OutMessages) {
   raw_ostream *DebugOS = Action != LLVMReturnStatusAction ? &errs() : nullptr;
   std::string Messages;
@@ -112,7 +112,7 @@ LLVMBool LLVMVerifyModule(LLVMModuleRef M, LLVMVerifierFailureAction Action,
   return Result;
 }
 
-LLVMBool LLVMVerifyFunction(LLVMValueRef Fn, LLVMVerifierFailureAction Action) {
+LLVMBool LLVM_STDCALL LLVMVerifyFunction(LLVMValueRef Fn, LLVMVerifierFailureAction Action) {
   LLVMBool Result = verifyFunction(
       *unwrap<Function>(Fn), Action != LLVMReturnStatusAction ? &errs()
                                                               : nullptr);
@@ -123,12 +123,12 @@ LLVMBool LLVMVerifyFunction(LLVMValueRef Fn, LLVMVerifierFailureAction Action) {
   return Result;
 }
 
-void LLVMViewFunctionCFG(LLVMValueRef Fn) {
+void LLVM_STDCALL LLVMViewFunctionCFG(LLVMValueRef Fn) {
   Function *F = unwrap<Function>(Fn);
   F->viewCFG();
 }
 
-void LLVMViewFunctionCFGOnly(LLVMValueRef Fn) {
+void LLVM_STDCALL LLVMViewFunctionCFGOnly(LLVMValueRef Fn) {
   Function *F = unwrap<Function>(Fn);
   F->viewCFGOnly();
 }

@@ -203,14 +203,14 @@ void *DynamicLibrary::SearchForAddressOfSymbol(const char *SymbolName) {
 // C API.
 //===----------------------------------------------------------------------===//
 
-LLVMBool LLVMLoadLibraryPermanently(const char *Filename) {
+LLVMBool LLVM_STDCALL LLVMLoadLibraryPermanently(const char *Filename) {
   return llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename);
 }
 
-void *LLVMSearchForAddressOfSymbol(const char *symbolName) {
+void *LLVM_STDCALL LLVMSearchForAddressOfSymbol(const char *symbolName) {
   return llvm::sys::DynamicLibrary::SearchForAddressOfSymbol(symbolName);
 }
 
-void LLVMAddSymbol(const char *symbolName, void *symbolValue) {
+void LLVM_STDCALL LLVMAddSymbol(const char *symbolName, void *symbolValue) {
   return llvm::sys::DynamicLibrary::AddSymbol(symbolName, symbolValue);
 }

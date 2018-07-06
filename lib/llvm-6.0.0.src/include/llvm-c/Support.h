@@ -27,7 +27,7 @@ extern "C" {
  *
  * @see sys::DynamicLibrary::LoadLibraryPermanently()
   */
-LLVMBool LLVMLoadLibraryPermanently(const char* Filename);
+LLVMBool LLVM_STDCALL LLVMLoadLibraryPermanently(const char* Filename);
 
 /**
  * This function parses the given arguments using the LLVM command line parser.
@@ -37,7 +37,7 @@ LLVMBool LLVMLoadLibraryPermanently(const char* Filename);
  *
  * @see llvm::cl::ParseCommandLineOptions()
  */
-void LLVMParseCommandLineOptions(int argc, const char *const *argv,
+void LLVM_STDCALL LLVMParseCommandLineOptions(int argc, const char *const *argv,
                                  const char *Overview);
 
 /**
@@ -47,7 +47,7 @@ void LLVMParseCommandLineOptions(int argc, const char *const *argv,
  *
  * @see sys::DynamicLibrary::SearchForAddressOfSymbol()
  */
-void *LLVMSearchForAddressOfSymbol(const char *symbolName);
+void *LLVM_STDCALL LLVMSearchForAddressOfSymbol(const char *symbolName);
 
 /**
  * This functions permanently adds the symbol \p symbolName with the
@@ -56,7 +56,7 @@ void *LLVMSearchForAddressOfSymbol(const char *symbolName);
  *
  * @see sys::DynamicLibrary::AddSymbol()
  */
-void LLVMAddSymbol(const char *symbolName, void *symbolValue);
+void LLVM_STDCALL LLVMAddSymbol(const char *symbolName, void *symbolValue);
 
 #ifdef __cplusplus
 }

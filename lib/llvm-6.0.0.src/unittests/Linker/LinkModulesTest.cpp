@@ -212,7 +212,7 @@ TEST_F(LinkModuleTest, NewCAPISuccess) {
   EXPECT_NE(nullptr, DestM->getFunction("bar"));
 }
 
-static void diagnosticHandler(LLVMDiagnosticInfoRef DI, void *C) {
+static void LLVM_STDCALL diagnosticHandler(LLVMDiagnosticInfoRef DI, void *C) {
   auto *Err = reinterpret_cast<std::string *>(C);
   char *CErr = LLVMGetDiagInfoDescription(DI);
   *Err = CErr;

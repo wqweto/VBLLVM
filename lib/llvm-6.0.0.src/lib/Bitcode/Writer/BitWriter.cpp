@@ -18,7 +18,7 @@ using namespace llvm;
 
 /*===-- Operations on modules ---------------------------------------------===*/
 
-int LLVMWriteBitcodeToFile(LLVMModuleRef M, const char *Path) {
+int LLVM_STDCALL LLVMWriteBitcodeToFile(LLVMModuleRef M, const char *Path) {
   std::error_code EC;
   raw_fd_ostream OS(Path, EC, sys::fs::F_None);
 
@@ -29,7 +29,7 @@ int LLVMWriteBitcodeToFile(LLVMModuleRef M, const char *Path) {
   return 0;
 }
 
-int LLVMWriteBitcodeToFD(LLVMModuleRef M, int FD, int ShouldClose,
+int LLVM_STDCALL LLVMWriteBitcodeToFD(LLVMModuleRef M, int FD, int ShouldClose,
                          int Unbuffered) {
   raw_fd_ostream OS(FD, ShouldClose, Unbuffered);
 
@@ -37,11 +37,11 @@ int LLVMWriteBitcodeToFD(LLVMModuleRef M, int FD, int ShouldClose,
   return 0;
 }
 
-int LLVMWriteBitcodeToFileHandle(LLVMModuleRef M, int FileHandle) {
+int LLVM_STDCALL LLVMWriteBitcodeToFileHandle(LLVMModuleRef M, int FileHandle) {
   return LLVMWriteBitcodeToFD(M, FileHandle, true, false);
 }
 
-LLVMMemoryBufferRef LLVMWriteBitcodeToMemoryBuffer(LLVMModuleRef M) {
+LLVMMemoryBufferRef LLVM_STDCALL LLVMWriteBitcodeToMemoryBuffer(LLVMModuleRef M) {
   std::string Data;
   raw_string_ostream OS(Data);
 

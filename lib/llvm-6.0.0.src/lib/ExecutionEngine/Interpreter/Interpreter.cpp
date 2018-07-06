@@ -28,7 +28,7 @@ static struct RegisterInterp {
 
 }
 
-extern "C" void LLVMLinkInInterpreter() { }
+extern "C" void LLVM_STDCALL LLVMLinkInInterpreter() { }
 
 /// Create a new interpreter object.
 ///

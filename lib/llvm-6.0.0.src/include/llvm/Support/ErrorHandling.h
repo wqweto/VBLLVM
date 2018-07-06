@@ -15,6 +15,10 @@
 #ifndef LLVM_SUPPORT_ERRORHANDLING_H
 #define LLVM_SUPPORT_ERRORHANDLING_H
 
+#ifndef LLVM_STDCALL
+#define LLVM_STDCALL __stdcall
+#endif
+
 #include "llvm/Support/Compiler.h"
 #include <string>
 

@@ -40,54 +40,54 @@ typedef struct LLVMOpaqueSymbolIterator *LLVMSymbolIteratorRef;
 typedef struct LLVMOpaqueRelocationIterator *LLVMRelocationIteratorRef;
 
 // ObjectFile creation
-LLVMObjectFileRef LLVMCreateObjectFile(LLVMMemoryBufferRef MemBuf);
-void LLVMDisposeObjectFile(LLVMObjectFileRef ObjectFile);
+LLVMObjectFileRef LLVM_STDCALL LLVMCreateObjectFile(LLVMMemoryBufferRef MemBuf);
+void LLVM_STDCALL LLVMDisposeObjectFile(LLVMObjectFileRef ObjectFile);
 
 // ObjectFile Section iterators
-LLVMSectionIteratorRef LLVMGetSections(LLVMObjectFileRef ObjectFile);
-void LLVMDisposeSectionIterator(LLVMSectionIteratorRef SI);
-LLVMBool LLVMIsSectionIteratorAtEnd(LLVMObjectFileRef ObjectFile,
+LLVMSectionIteratorRef LLVM_STDCALL LLVMGetSections(LLVMObjectFileRef ObjectFile);
+void LLVM_STDCALL LLVMDisposeSectionIterator(LLVMSectionIteratorRef SI);
+LLVMBool LLVM_STDCALL LLVMIsSectionIteratorAtEnd(LLVMObjectFileRef ObjectFile,
                                 LLVMSectionIteratorRef SI);
-void LLVMMoveToNextSection(LLVMSectionIteratorRef SI);
-void LLVMMoveToContainingSection(LLVMSectionIteratorRef Sect,
+void LLVM_STDCALL LLVMMoveToNextSection(LLVMSectionIteratorRef SI);
+void LLVM_STDCALL LLVMMoveToContainingSection(LLVMSectionIteratorRef Sect,
                                  LLVMSymbolIteratorRef Sym);
 
 // ObjectFile Symbol iterators
-LLVMSymbolIteratorRef LLVMGetSymbols(LLVMObjectFileRef ObjectFile);
-void LLVMDisposeSymbolIterator(LLVMSymbolIteratorRef SI);
-LLVMBool LLVMIsSymbolIteratorAtEnd(LLVMObjectFileRef ObjectFile,
+LLVMSymbolIteratorRef LLVM_STDCALL LLVMGetSymbols(LLVMObjectFileRef ObjectFile);
+void LLVM_STDCALL LLVMDisposeSymbolIterator(LLVMSymbolIteratorRef SI);
+LLVMBool LLVM_STDCALL LLVMIsSymbolIteratorAtEnd(LLVMObjectFileRef ObjectFile,
                                 LLVMSymbolIteratorRef SI);
-void LLVMMoveToNextSymbol(LLVMSymbolIteratorRef SI);
+void LLVM_STDCALL LLVMMoveToNextSymbol(LLVMSymbolIteratorRef SI);
 
 // SectionRef accessors
-const char *LLVMGetSectionName(LLVMSectionIteratorRef SI);
-uint64_t LLVMGetSectionSize(LLVMSectionIteratorRef SI);
-const char *LLVMGetSectionContents(LLVMSectionIteratorRef SI);
-uint64_t LLVMGetSectionAddress(LLVMSectionIteratorRef SI);
-LLVMBool LLVMGetSectionContainsSymbol(LLVMSectionIteratorRef SI,
+const char *LLVM_STDCALL LLVMGetSectionName(LLVMSectionIteratorRef SI);
+uint64_t LLVM_STDCALL LLVMGetSectionSize(LLVMSectionIteratorRef SI);
+const char *LLVM_STDCALL LLVMGetSectionContents(LLVMSectionIteratorRef SI);
+uint64_t LLVM_STDCALL LLVMGetSectionAddress(LLVMSectionIteratorRef SI);
+LLVMBool LLVM_STDCALL LLVMGetSectionContainsSymbol(LLVMSectionIteratorRef SI,
                                  LLVMSymbolIteratorRef Sym);
 
 // Section Relocation iterators
-LLVMRelocationIteratorRef LLVMGetRelocations(LLVMSectionIteratorRef Section);
-void LLVMDisposeRelocationIterator(LLVMRelocationIteratorRef RI);
-LLVMBool LLVMIsRelocationIteratorAtEnd(LLVMSectionIteratorRef Section,
+LLVMRelocationIteratorRef LLVM_STDCALL LLVMGetRelocations(LLVMSectionIteratorRef Section);
+void LLVM_STDCALL LLVMDisposeRelocationIterator(LLVMRelocationIteratorRef RI);
+LLVMBool LLVM_STDCALL LLVMIsRelocationIteratorAtEnd(LLVMSectionIteratorRef Section,
                                        LLVMRelocationIteratorRef RI);
-void LLVMMoveToNextRelocation(LLVMRelocationIteratorRef RI);
+void LLVM_STDCALL LLVMMoveToNextRelocation(LLVMRelocationIteratorRef RI);
 
 
 // SymbolRef accessors
-const char *LLVMGetSymbolName(LLVMSymbolIteratorRef SI);
-uint64_t LLVMGetSymbolAddress(LLVMSymbolIteratorRef SI);
-uint64_t LLVMGetSymbolSize(LLVMSymbolIteratorRef SI);
+const char *LLVM_STDCALL LLVMGetSymbolName(LLVMSymbolIteratorRef SI);
+uint64_t LLVM_STDCALL LLVMGetSymbolAddress(LLVMSymbolIteratorRef SI);
+uint64_t LLVM_STDCALL LLVMGetSymbolSize(LLVMSymbolIteratorRef SI);
 
 // RelocationRef accessors
-uint64_t LLVMGetRelocationOffset(LLVMRelocationIteratorRef RI);
-LLVMSymbolIteratorRef LLVMGetRelocationSymbol(LLVMRelocationIteratorRef RI);
-uint64_t LLVMGetRelocationType(LLVMRelocationIteratorRef RI);
+uint64_t LLVM_STDCALL LLVMGetRelocationOffset(LLVMRelocationIteratorRef RI);
+LLVMSymbolIteratorRef LLVM_STDCALL LLVMGetRelocationSymbol(LLVMRelocationIteratorRef RI);
+uint64_t LLVM_STDCALL LLVMGetRelocationType(LLVMRelocationIteratorRef RI);
 // NOTE: Caller takes ownership of returned string of the two
 // following functions.
-const char *LLVMGetRelocationTypeName(LLVMRelocationIteratorRef RI);
-const char *LLVMGetRelocationValueString(LLVMRelocationIteratorRef RI);
+const char *LLVM_STDCALL LLVMGetRelocationTypeName(LLVMRelocationIteratorRef RI);
+const char *LLVM_STDCALL LLVMGetRelocationValueString(LLVMRelocationIteratorRef RI);
 
 /**
  * @}

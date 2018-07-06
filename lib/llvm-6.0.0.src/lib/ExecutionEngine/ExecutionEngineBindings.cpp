@@ -37,7 +37,7 @@ static LLVMTargetMachineRef wrap(const TargetMachine *P) {
 
 /*===-- Operations on generic values --------------------------------------===*/
 
-LLVMGenericValueRef LLVMCreateGenericValueOfInt(LLVMTypeRef Ty,
+LLVMGenericValueRef LLVM_STDCALL LLVMCreateGenericValueOfInt(LLVMTypeRef Ty,
                                                 unsigned long long N,
                                                 LLVMBool IsSigned) {
   GenericValue *GenVal = new GenericValue();
@@ -45,13 +45,13 @@ LLVMGenericValueRef LLVMCreateGenericValueOfInt(LLVMTypeRef Ty,
   return wrap(GenVal);
 }
 
-LLVMGenericValueRef LLVMCreateGenericValueOfPointer(void *P) {
+LLVMGenericValueRef LLVM_STDCALL LLVMCreateGenericValueOfPointer(void *P) {
   GenericValue *GenVal = new GenericValue();
   GenVal->PointerVal = P;
   return wrap(GenVal);
 }
 
-LLVMGenericValueRef LLVMCreateGenericValueOfFloat(LLVMTypeRef TyRef, double N) {
+LLVMGenericValueRef LLVM_STDCALL LLVMCreateGenericValueOfFloat(LLVMTypeRef TyRef, double N) {
   GenericValue *GenVal = new GenericValue();
   switch (unwrap(TyRef)->getTypeID()) {
   case Type::FloatTyID:
@@ -66,11 +66,11 @@ LLVMGenericValueRef LLVMCreateGenericValueOfFloat(LLVMTypeRef TyRef, double N) {
   return wrap(GenVal);
 }
 
-unsigned LLVMGenericValueIntWidth(LLVMGenericValueRef GenValRef) {
+unsigned LLVM_STDCALL LLVMGenericValueIntWidth(LLVMGenericValueRef GenValRef) {
   return unwrap(GenValRef)->IntVal.getBitWidth();
 }
 
-unsigned long long LLVMGenericValueToInt(LLVMGenericValueRef GenValRef,
+unsigned long long LLVM_STDCALL LLVMGenericValueToInt(LLVMGenericValueRef GenValRef,
                                          LLVMBool IsSigned) {
   GenericValue *GenVal = unwrap(GenValRef);
   if (IsSigned)
@@ -79,11 +79,11 @@ unsigned long long LLVMGenericValueToInt(LLVMGenericValueRef GenValRef,
     return GenVal->IntVal.getZExtValue();
 }
 
-void *LLVMGenericValueToPointer(LLVMGenericValueRef GenVal) {
+void *LLVM_STDCALL LLVMGenericValueToPointer(LLVMGenericValueRef GenVal) {
   return unwrap(GenVal)->PointerVal;
 }
 
-double LLVMGenericValueToFloat(LLVMTypeRef TyRef, LLVMGenericValueRef GenVal) {
+double LLVM_STDCALL LLVMGenericValueToFloat(LLVMTypeRef TyRef, LLVMGenericValueRef GenVal) {
   switch (unwrap(TyRef)->getTypeID()) {
   case Type::FloatTyID:
     return unwrap(GenVal)->FloatVal;
@@ -94,13 +94,13 @@ double LLVMGenericValueToFloat(LLVMTypeRef TyRef, LLVMGenericValueRef GenVal) {
   }
 }
 
-void LLVMDisposeGenericValue(LLVMGenericValueRef GenVal) {
+void LLVM_STDCALL LLVMDisposeGenericValue(LLVMGenericValueRef GenVal) {
   delete unwrap(GenVal);
 }
 
 /*===-- Operations on execution engines -----------------------------------===*/
 
-LLVMBool LLVMCreateExecutionEngineForModule(LLVMExecutionEngineRef *OutEE,
+LLVMBool LLVM_STDCALL LLVMCreateExecutionEngineForModule(LLVMExecutionEngineRef *OutEE,
                                             LLVMModuleRef M,
                                             char **OutError) {
   std::string Error;
@@ -115,7 +115,7 @@ LLVMBool LLVMCreateExecutionEngineForModule(LLVMExecutionEngineRef *OutEE,
   return 1;
 }
 
-LLVMBool LLVMCreateInterpreterForModule(LLVMExecutionEngineRef *OutInterp,
+LLVMBool LLVM_STDCALL LLVMCreateInterpreterForModule(LLVMExecutionEngineRef *OutInterp,
                                         LLVMModuleRef M,
                                         char **OutError) {
   std::string Error;
@@ -130,7 +130,7 @@ LLVMBool LLVMCreateInterpreterForModule(LLVMExecutionEngineRef *OutInterp,
   return 1;
 }
 
-LLVMBool LLVMCreateJITCompilerForModule(LLVMExecutionEngineRef *OutJIT,
+LLVMBool LLVM_STDCALL LLVMCreateJITCompilerForModule(LLVMExecutionEngineRef *OutJIT,
                                         LLVMModuleRef M,
                                         unsigned OptLevel,
                                         char **OutError) {
@@ -147,7 +147,7 @@ LLVMBool LLVMCreateJITCompilerForModule(LLVMExecutionEngineRef *OutJIT,
   return 1;
 }
 
-void LLVMInitializeMCJITCompilerOptions(LLVMMCJITCompilerOptions *PassedOptions,
+void LLVM_STDCALL LLVMInitializeMCJITCompilerOptions(LLVMMCJITCompilerOptions *PassedOptions,
                                         size_t SizeOfPassedOptions) {
   LLVMMCJITCompilerOptions options;
   memset(&options, 0, sizeof(options)); // Most fields are zero by default.
@@ -157,7 +157,7 @@ void LLVMInitializeMCJITCompilerOptions(LLVMMCJITCompilerOptions *PassedOptions,
          std::min(sizeof(options), SizeOfPassedOptions));
 }
 
-LLVMBool LLVMCreateMCJITCompilerForModule(
+LLVMBool LLVM_STDCALL LLVMCreateMCJITCompilerForModule(
     LLVMExecutionEngineRef *OutJIT, LLVMModuleRef M,
     LLVMMCJITCompilerOptions *PassedOptions, size_t SizeOfPassedOptions,
     char **OutError) {
@@ -213,21 +213,21 @@ LLVMBool LLVMCreateMCJITCompilerForModule(
   return 1;
 }
 
-void LLVMDisposeExecutionEngine(LLVMExecutionEngineRef EE) {
+void LLVM_STDCALL LLVMDisposeExecutionEngine(LLVMExecutionEngineRef EE) {
   delete unwrap(EE);
 }
 
-void LLVMRunStaticConstructors(LLVMExecutionEngineRef EE) {
+void LLVM_STDCALL LLVMRunStaticConstructors(LLVMExecutionEngineRef EE) {
   unwrap(EE)->finalizeObject();
   unwrap(EE)->runStaticConstructorsDestructors(false);
 }
 
-void LLVMRunStaticDestructors(LLVMExecutionEngineRef EE) {
+void LLVM_STDCALL LLVMRunStaticDestructors(LLVMExecutionEngineRef EE) {
   unwrap(EE)->finalizeObject();
   unwrap(EE)->runStaticConstructorsDestructors(true);
 }
 
-int LLVMRunFunctionAsMain(LLVMExecutionEngineRef EE, LLVMValueRef F,
+int LLVM_STDCALL LLVMRunFunctionAsMain(LLVMExecutionEngineRef EE, LLVMValueRef F,
                           unsigned ArgC, const char * const *ArgV,
                           const char * const *EnvP) {
   unwrap(EE)->finalizeObject();
@@ -236,7 +236,7 @@ int LLVMRunFunctionAsMain(LLVMExecutionEngineRef EE, LLVMValueRef F,
   return unwrap(EE)->runFunctionAsMain(unwrap<Function>(F), ArgVec, EnvP);
 }
 
-LLVMGenericValueRef LLVMRunFunction(LLVMExecutionEngineRef EE, LLVMValueRef F,
+LLVMGenericValueRef LLVM_STDCALL LLVMRunFunction(LLVMExecutionEngineRef EE, LLVMValueRef F,
                                     unsigned NumArgs,
                                     LLVMGenericValueRef *Args) {
   unwrap(EE)->finalizeObject();
@@ -251,14 +251,14 @@ LLVMGenericValueRef LLVMRunFunction(LLVMExecutionEngineRef EE, LLVMValueRef F,
   return wrap(Result);
 }
 
-void LLVMFreeMachineCodeForFunction(LLVMExecutionEngineRef EE, LLVMValueRef F) {
+void LLVM_STDCALL LLVMFreeMachineCodeForFunction(LLVMExecutionEngineRef EE, LLVMValueRef F) {
 }
 
-void LLVMAddModule(LLVMExecutionEngineRef EE, LLVMModuleRef M){
+void LLVM_STDCALL LLVMAddModule(LLVMExecutionEngineRef EE, LLVMModuleRef M){
   unwrap(EE)->addModule(std::unique_ptr<Module>(unwrap(M)));
 }
 
-LLVMBool LLVMRemoveModule(LLVMExecutionEngineRef EE, LLVMModuleRef M,
+LLVMBool LLVM_STDCALL LLVMRemoveModule(LLVMExecutionEngineRef EE, LLVMModuleRef M,
                           LLVMModuleRef *OutMod, char **OutError) {
   Module *Mod = unwrap(M);
   unwrap(EE)->removeModule(Mod);
@@ -266,7 +266,7 @@ LLVMBool LLVMRemoveModule(LLVMExecutionEngineRef EE, LLVMModuleRef M,
   return 0;
 }
 
-LLVMBool LLVMFindFunction(LLVMExecutionEngineRef EE, const char *Name,
+LLVMBool LLVM_STDCALL LLVMFindFunction(LLVMExecutionEngineRef EE, const char *Name,
                           LLVMValueRef *OutFn) {
   if (Function *F = unwrap(EE)->FindFunctionNamed(Name)) {
     *OutFn = wrap(F);
@@ -275,36 +275,36 @@ LLVMBool LLVMFindFunction(LLVMExecutionEngineRef EE, const char *Name,
   return 1;
 }
 
-void *LLVMRecompileAndRelinkFunction(LLVMExecutionEngineRef EE,
+void *LLVM_STDCALL LLVMRecompileAndRelinkFunction(LLVMExecutionEngineRef EE,
                                      LLVMValueRef Fn) {
   return nullptr;
 }
 
-LLVMTargetDataRef LLVMGetExecutionEngineTargetData(LLVMExecutionEngineRef EE) {
+LLVMTargetDataRef LLVM_STDCALL LLVMGetExecutionEngineTargetData(LLVMExecutionEngineRef EE) {
   return wrap(&unwrap(EE)->getDataLayout());
 }
 
-LLVMTargetMachineRef
+LLVMTargetMachineRef LLVM_STDCALL 
 LLVMGetExecutionEngineTargetMachine(LLVMExecutionEngineRef EE) {
   return wrap(unwrap(EE)->getTargetMachine());
 }
 
-void LLVMAddGlobalMapping(LLVMExecutionEngineRef EE, LLVMValueRef Global,
+void LLVM_STDCALL LLVMAddGlobalMapping(LLVMExecutionEngineRef EE, LLVMValueRef Global,
                           void* Addr) {
   unwrap(EE)->addGlobalMapping(unwrap<GlobalValue>(Global), Addr);
 }
 
-void *LLVMGetPointerToGlobal(LLVMExecutionEngineRef EE, LLVMValueRef Global) {
+void *LLVM_STDCALL LLVMGetPointerToGlobal(LLVMExecutionEngineRef EE, LLVMValueRef Global) {
   unwrap(EE)->finalizeObject();
   
   return unwrap(EE)->getPointerToGlobal(unwrap<GlobalValue>(Global));
 }
 
-uint64_t LLVMGetGlobalValueAddress(LLVMExecutionEngineRef EE, const char *Name) {
+uint64_t LLVM_STDCALL LLVMGetGlobalValueAddress(LLVMExecutionEngineRef EE, const char *Name) {
   return unwrap(EE)->getGlobalValueAddress(Name);
 }
 
-uint64_t LLVMGetFunctionAddress(LLVMExecutionEngineRef EE, const char *Name) {
+uint64_t LLVM_STDCALL LLVMGetFunctionAddress(LLVMExecutionEngineRef EE, const char *Name) {
   return unwrap(EE)->getFunctionAddress(Name);
 }
 
@@ -388,7 +388,7 @@ bool SimpleBindingMemoryManager::finalizeMemory(std::string *ErrMsg) {
 
 } // anonymous namespace
 
-LLVMMCJITMemoryManagerRef LLVMCreateSimpleMCJITMemoryManager(
+LLVMMCJITMemoryManagerRef LLVM_STDCALL LLVMCreateSimpleMCJITMemoryManager(
   void *Opaque,
   LLVMMemoryManagerAllocateCodeSectionCallback AllocateCodeSection,
   LLVMMemoryManagerAllocateDataSectionCallback AllocateDataSection,
@@ -407,7 +407,7 @@ LLVMMCJITMemoryManagerRef LLVMCreateSimpleMCJITMemoryManager(
   return wrap(new SimpleBindingMemoryManager(functions, Opaque));
 }
 
-void LLVMDisposeMCJITMemoryManager(LLVMMCJITMemoryManagerRef MM) {
+void LLVM_STDCALL LLVMDisposeMCJITMemoryManager(LLVMMCJITMemoryManagerRef MM) {
   delete unwrap(MM);
 }
 

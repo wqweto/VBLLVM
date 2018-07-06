@@ -37,20 +37,20 @@ extern "C" {
    Optionally returns a human-readable error message via OutMessage.
 
    This is deprecated. Use LLVMParseBitcode2. */
-LLVMBool LLVMParseBitcode(LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutModule,
+LLVMBool LLVM_STDCALL LLVMParseBitcode(LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutModule,
                           char **OutMessage);
 
 /* Builds a module from the bitcode in the specified memory buffer, returning a
    reference to the module via the OutModule parameter. Returns 0 on success. */
-LLVMBool LLVMParseBitcode2(LLVMMemoryBufferRef MemBuf,
+LLVMBool LLVM_STDCALL LLVMParseBitcode2(LLVMMemoryBufferRef MemBuf,
                            LLVMModuleRef *OutModule);
 
 /* This is deprecated. Use LLVMParseBitcodeInContext2. */
-LLVMBool LLVMParseBitcodeInContext(LLVMContextRef ContextRef,
+LLVMBool LLVM_STDCALL LLVMParseBitcodeInContext(LLVMContextRef ContextRef,
                                    LLVMMemoryBufferRef MemBuf,
                                    LLVMModuleRef *OutModule, char **OutMessage);
 
-LLVMBool LLVMParseBitcodeInContext2(LLVMContextRef ContextRef,
+LLVMBool LLVM_STDCALL LLVMParseBitcodeInContext2(LLVMContextRef ContextRef,
                                     LLVMMemoryBufferRef MemBuf,
                                     LLVMModuleRef *OutModule);
 
@@ -58,21 +58,21 @@ LLVMBool LLVMParseBitcodeInContext2(LLVMContextRef ContextRef,
     a module provider which performs lazy deserialization. Returns 0 on success.
     Optionally returns a human-readable error message via OutMessage.
     This is deprecated. Use LLVMGetBitcodeModuleInContext2. */
-LLVMBool LLVMGetBitcodeModuleInContext(LLVMContextRef ContextRef,
+LLVMBool LLVM_STDCALL LLVMGetBitcodeModuleInContext(LLVMContextRef ContextRef,
                                        LLVMMemoryBufferRef MemBuf,
                                        LLVMModuleRef *OutM, char **OutMessage);
 
 /** Reads a module from the specified path, returning via the OutMP parameter a
  * module provider which performs lazy deserialization. Returns 0 on success. */
-LLVMBool LLVMGetBitcodeModuleInContext2(LLVMContextRef ContextRef,
+LLVMBool LLVM_STDCALL LLVMGetBitcodeModuleInContext2(LLVMContextRef ContextRef,
                                         LLVMMemoryBufferRef MemBuf,
                                         LLVMModuleRef *OutM);
 
 /* This is deprecated. Use LLVMGetBitcodeModule2. */
-LLVMBool LLVMGetBitcodeModule(LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutM,
+LLVMBool LLVM_STDCALL LLVMGetBitcodeModule(LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutM,
                               char **OutMessage);
 
-LLVMBool LLVMGetBitcodeModule2(LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutM);
+LLVMBool LLVM_STDCALL LLVMGetBitcodeModule2(LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutM);
 
 /**
  * @}

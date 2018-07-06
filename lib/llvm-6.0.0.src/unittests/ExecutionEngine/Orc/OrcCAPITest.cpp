@@ -55,7 +55,7 @@ protected:
 
   static char *testFuncName;
 
-  static uint64_t myResolver(const char *Name, void *Ctx) {
+  static uint64_t LLVM_STDCALL myResolver(const char *Name, void *Ctx) {
     if (!strncmp(Name, testFuncName, 8))
       return (uint64_t)&myTestFuncImpl;
     return 0;
@@ -70,7 +70,7 @@ protected:
     bool Compiled;
   };
 
-  static LLVMOrcTargetAddress myCompileCallback(LLVMOrcJITStackRef JITStack,
+  static LLVMOrcTargetAddress LLVM_STDCALL myCompileCallback(LLVMOrcJITStackRef JITStack,
                                                 void *Ctx) {
     CompileContext *CCtx = static_cast<CompileContext*>(Ctx);
     auto *ET = CCtx->APIExecTest;

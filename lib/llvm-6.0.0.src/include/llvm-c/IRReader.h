@@ -29,7 +29,7 @@ extern "C" {
  *
  * @see llvm::ParseIR()
  */
-LLVMBool LLVMParseIRInContext(LLVMContextRef ContextRef,
+LLVMBool LLVM_STDCALL LLVMParseIRInContext(LLVMContextRef ContextRef,
                               LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutM,
                               char **OutMessage);
 

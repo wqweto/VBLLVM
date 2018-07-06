@@ -30,7 +30,7 @@ static bool didCallAllocateCodeSection;
 static bool didAllocateCompactUnwindSection;
 static bool didCallYield;
 
-static uint8_t *roundTripAllocateCodeSection(void *object, uintptr_t size,
+static uint8_t *LLVM_STDCALL roundTripAllocateCodeSection(void *object, uintptr_t size,
                                              unsigned alignment,
                                              unsigned sectionID,
                                              const char *sectionName) {
@@ -39,7 +39,7 @@ static uint8_t *roundTripAllocateCodeSection(void *object, uintptr_t size,
     size, alignment, sectionID, sectionName);
 }
 
-static uint8_t *roundTripAllocateDataSection(void *object, uintptr_t size,
+static uint8_t *LLVM_STDCALL roundTripAllocateDataSection(void *object, uintptr_t size,
                                              unsigned alignment,
                                              unsigned sectionID,
                                              const char *sectionName,
@@ -50,7 +50,7 @@ static uint8_t *roundTripAllocateDataSection(void *object, uintptr_t size,
     size, alignment, sectionID, sectionName, isReadOnly);
 }
 
-static LLVMBool roundTripFinalizeMemory(void *object, char **errMsg) {
+static LLVMBool LLVM_STDCALL roundTripFinalizeMemory(void *object, char **errMsg) {
   std::string errMsgString;
   bool result =
     static_cast<SectionMemoryManager*>(object)->finalizeMemory(&errMsgString);
@@ -61,11 +61,11 @@ static LLVMBool roundTripFinalizeMemory(void *object, char **errMsg) {
   return 0;
 }
 
-static void roundTripDestroy(void *object) {
+static void LLVM_STDCALL roundTripDestroy(void *object) {
   delete static_cast<SectionMemoryManager*>(object);
 }
 
-static void yield(LLVMContextRef, void *) {
+static void LLVM_STDCALL yield(LLVMContextRef, void *) {
   didCallYield = true;
 }
 

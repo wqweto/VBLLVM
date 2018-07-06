@@ -2213,7 +2213,7 @@ void cl::ResetAllOptionOccurrences() {
   GlobalParser->ResetAllOptionOccurrences();
 }
 
-void LLVMParseCommandLineOptions(int argc, const char *const *argv,
+void LLVM_STDCALL LLVMParseCommandLineOptions(int argc, const char *const *argv,
                                  const char *Overview) {
   llvm::cl::ParseCommandLineOptions(argc, argv, StringRef(Overview),
                                     &llvm::nulls());

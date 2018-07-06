@@ -122,12 +122,12 @@ typedef enum {
 /**
  * The current debug metadata version number.
  */
-unsigned LLVMDebugMetadataVersion(void);
+unsigned LLVM_STDCALL LLVMDebugMetadataVersion(void);
 
 /**
  * The version of debug metadata that's present in the provided \c Module.
  */
-unsigned LLVMGetModuleDebugMetadataVersion(LLVMModuleRef Module);
+unsigned LLVM_STDCALL LLVMGetModuleDebugMetadataVersion(LLVMModuleRef Module);
 
 /**
  * Strip debug info in the module if it exists.
@@ -135,31 +135,31 @@ unsigned LLVMGetModuleDebugMetadataVersion(LLVMModuleRef Module);
  * metadata for debugging. We also remove debug locations for instructions.
  * Return true if module is modified.
  */
-LLVMBool LLVMStripModuleDebugInfo(LLVMModuleRef Module);
+LLVMBool LLVM_STDCALL LLVMStripModuleDebugInfo(LLVMModuleRef Module);
 
 /**
  * Construct a builder for a module, and do not allow for unresolved nodes
  * attached to the module.
  */
-LLVMDIBuilderRef LLVMCreateDIBuilderDisallowUnresolved(LLVMModuleRef M);
+LLVMDIBuilderRef LLVM_STDCALL LLVMCreateDIBuilderDisallowUnresolved(LLVMModuleRef M);
 
 /**
  * Construct a builder for a module and collect unresolved nodes attached
  * to the module in order to resolve cycles during a call to
  * \c LLVMDIBuilderFinalize.
  */
-LLVMDIBuilderRef LLVMCreateDIBuilder(LLVMModuleRef M);
+LLVMDIBuilderRef LLVM_STDCALL LLVMCreateDIBuilder(LLVMModuleRef M);
 
 /**
  * Deallocates the \c DIBuilder and everything it owns.
  * @note You must call \c LLVMDIBuilderFinalize before this
  */
-void LLVMDisposeDIBuilder(LLVMDIBuilderRef Builder);
+void LLVM_STDCALL LLVMDisposeDIBuilder(LLVMDIBuilderRef Builder);
 
 /**
  * Construct any deferred debug info descriptors.
  */
-void LLVMDIBuilderFinalize(LLVMDIBuilderRef Builder);
+void LLVM_STDCALL LLVMDIBuilderFinalize(LLVMDIBuilderRef Builder);
 
 /**
  * A CompileUnit provides an anchor for all debugging
@@ -189,7 +189,7 @@ void LLVMDIBuilderFinalize(LLVMDIBuilderRef Builder);
  * \param DebugInfoForProfiling Whether to emit extra debug info for
  *                              profile collection.
  */
-LLVMMetadataRef LLVMDIBuilderCreateCompileUnit(
+LLVMMetadataRef LLVM_STDCALL LLVMDIBuilderCreateCompileUnit(
     LLVMDIBuilderRef Builder, LLVMDWARFSourceLanguage Lang,
     LLVMMetadataRef FileRef, const char *Producer, size_t ProducerLen,
     LLVMBool isOptimized, const char *Flags, size_t FlagsLen,
@@ -205,8 +205,7 @@ LLVMMetadataRef LLVMDIBuilderCreateCompileUnit(
  * \param Directory    Directory.
  * \param DirectoryLen The length of the C string passed to \c Directory.
  */
-LLVMMetadataRef
-LLVMDIBuilderCreateFile(LLVMDIBuilderRef Builder, const char *Filename,
+LLVMMetadataRef LLVM_STDCALL LLVMDIBuilderCreateFile(LLVMDIBuilderRef Builder, const char *Filename,
                         size_t FilenameLen, const char *Directory,
                         size_t DirectoryLen);
 
@@ -220,8 +219,7 @@ LLVMDIBuilderCreateFile(LLVMDIBuilderRef Builder, const char *Filename,
  * \note If the item to which this location is attached cannot be
  *       attributed to a source line, pass 0 for the line and column.
  */
-LLVMMetadataRef
-LLVMDIBuilderCreateDebugLocation(LLVMContextRef Ctx, unsigned Line,
+LLVMMetadataRef LLVM_STDCALL LLVMDIBuilderCreateDebugLocation(LLVMContextRef Ctx, unsigned Line,
                                  unsigned Column, LLVMMetadataRef Scope,
                                  LLVMMetadataRef InlinedAt);
 

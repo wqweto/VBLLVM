@@ -13,7 +13,7 @@
 
 using namespace llvm;
 
-static const char *symbolLookupCallback(void *DisInfo, uint64_t ReferenceValue,
+static const char *LLVM_STDCALL symbolLookupCallback(void *DisInfo, uint64_t ReferenceValue,
                                         uint64_t *ReferenceType,
                                         uint64_t ReferencePC,
                                         const char **ReferenceName) {

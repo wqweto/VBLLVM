@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void diagnosticHandler(LLVMDiagnosticInfoRef DI, void *C) {
+static void LLVM_STDCALL diagnosticHandler(LLVMDiagnosticInfoRef DI, void *C) {
   char *CErr = LLVMGetDiagInfoDescription(DI);
   fprintf(stderr, "Error with new bitcode parser: %s\n", CErr);
   LLVMDisposeMessage(CErr);

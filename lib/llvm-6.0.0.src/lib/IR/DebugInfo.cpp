@@ -692,35 +692,35 @@ case LLVMDWARFSourceLanguage##NAME: return ID;
   llvm_unreachable("Unhandled Tag");
 }
 
-unsigned LLVMDebugMetadataVersion() {
+unsigned LLVM_STDCALL LLVMDebugMetadataVersion() {
   return DEBUG_METADATA_VERSION;
 }
 
-LLVMDIBuilderRef LLVMCreateDIBuilderDisallowUnresolved(LLVMModuleRef M) {
+LLVMDIBuilderRef LLVM_STDCALL LLVMCreateDIBuilderDisallowUnresolved(LLVMModuleRef M) {
   return wrap(new DIBuilder(*unwrap(M), false));
 }
 
-LLVMDIBuilderRef LLVMCreateDIBuilder(LLVMModuleRef M) {
+LLVMDIBuilderRef LLVM_STDCALL LLVMCreateDIBuilder(LLVMModuleRef M) {
   return wrap(new DIBuilder(*unwrap(M)));
 }
 
-unsigned LLVMGetModuleDebugMetadataVersion(LLVMModuleRef M) {
+unsigned LLVM_STDCALL LLVMGetModuleDebugMetadataVersion(LLVMModuleRef M) {
   return getDebugMetadataVersionFromModule(*unwrap(M));
 }
 
-LLVMBool LLVMStripModuleDebugInfo(LLVMModuleRef M) {
+LLVMBool LLVM_STDCALL LLVMStripModuleDebugInfo(LLVMModuleRef M) {
   return StripDebugInfo(*unwrap(M));
 }
 
-void LLVMDisposeDIBuilder(LLVMDIBuilderRef Builder) {
+void LLVM_STDCALL LLVMDisposeDIBuilder(LLVMDIBuilderRef Builder) {
   delete unwrap(Builder);
 }
 
-void LLVMDIBuilderFinalize(LLVMDIBuilderRef Builder) {
+void LLVM_STDCALL LLVMDIBuilderFinalize(LLVMDIBuilderRef Builder) {
   unwrap(Builder)->finalize();
 }
 
-LLVMMetadataRef LLVMDIBuilderCreateCompileUnit(
+LLVMMetadataRef LLVM_STDCALL LLVMDIBuilderCreateCompileUnit(
     LLVMDIBuilderRef Builder, LLVMDWARFSourceLanguage Lang,
     LLVMMetadataRef FileRef, const char *Producer, size_t ProducerLen,
     LLVMBool isOptimized, const char *Flags, size_t FlagsLen,
@@ -738,16 +738,14 @@ LLVMMetadataRef LLVMDIBuilderCreateCompileUnit(
                  SplitDebugInlining, DebugInfoForProfiling));
 }
 
-LLVMMetadataRef
-LLVMDIBuilderCreateFile(LLVMDIBuilderRef Builder, const char *Filename,
+LLVMMetadataRef LLVM_STDCALL LLVMDIBuilderCreateFile(LLVMDIBuilderRef Builder, const char *Filename,
                         size_t FilenameLen, const char *Directory,
                         size_t DirectoryLen) {
   return wrap(unwrap(Builder)->createFile(StringRef(Filename, FilenameLen),
                                           StringRef(Directory, DirectoryLen)));
 }
 
-LLVMMetadataRef
-LLVMDIBuilderCreateDebugLocation(LLVMContextRef Ctx, unsigned Line,
+LLVMMetadataRef LLVM_STDCALL LLVMDIBuilderCreateDebugLocation(LLVMContextRef Ctx, unsigned Line,
                                  unsigned Column, LLVMMetadataRef Scope,
                                  LLVMMetadataRef InlinedAt) {
   return wrap(DILocation::get(*unwrap(Ctx), Line, Column, unwrap(Scope),

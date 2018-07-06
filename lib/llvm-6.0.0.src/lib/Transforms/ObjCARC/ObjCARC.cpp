@@ -35,6 +35,6 @@ void llvm::initializeObjCARCOpts(PassRegistry &Registry) {
   initializePAEvalPass(Registry);
 }
 
-void LLVMInitializeObjCARCOpts(LLVMPassRegistryRef R) {
+void LLVM_STDCALL LLVMInitializeObjCARCOpts(LLVMPassRegistryRef R) {
   initializeObjCARCOpts(*unwrap(R));
 }

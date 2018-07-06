@@ -2179,7 +2179,7 @@ struct DisassembleInfo {
 // names and addends of the symbolic expression to add for the operand.  The
 // value of TagType is currently 1 (for the LLVMOpInfo1 struct). If symbolic
 // information is returned then this function returns 1 else it returns 0.
-static int SymbolizerGetOpInfo(void *DisInfo, uint64_t Pc, uint64_t Offset,
+static int LLVM_STDCALL SymbolizerGetOpInfo(void *DisInfo, uint64_t Pc, uint64_t Offset,
                                uint64_t Size, int TagType, void *TagBuf) {
   struct DisassembleInfo *info = (struct DisassembleInfo *)DisInfo;
   struct LLVMOpInfo1 *op_info = (struct LLVMOpInfo1 *)TagBuf;
@@ -6608,7 +6608,7 @@ static const char *GuessLiteralPointer(uint64_t ReferenceValue,
 // SymbolValue is checked to be an address of literal pointer, symbol pointer,
 // or an Objective-C meta data reference.  If so the output ReferenceType is
 // set to correspond to that as well as setting the ReferenceName.
-static const char *SymbolizerSymbolLookUp(void *DisInfo,
+static const char *LLVM_STDCALL SymbolizerSymbolLookUp(void *DisInfo,
                                           uint64_t ReferenceValue,
                                           uint64_t *ReferenceType,
                                           uint64_t ReferencePC,

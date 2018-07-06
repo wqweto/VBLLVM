@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 
-static void diagnosticHandler(LLVMDiagnosticInfoRef DI, void *C) {
+static void LLVM_STDCALL diagnosticHandler(LLVMDiagnosticInfoRef DI, void *C) {
   fprintf(stderr, "Executing diagnostic handler\n");
 
   fprintf(stderr, "Diagnostic severity is of type ");

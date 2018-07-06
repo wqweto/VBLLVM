@@ -108,7 +108,7 @@ std::unique_ptr<Module> llvm::parseIRFile(StringRef Filename, SMDiagnostic &Err,
 // C API.
 //===----------------------------------------------------------------------===//
 
-LLVMBool LLVMParseIRInContext(LLVMContextRef ContextRef,
+LLVMBool LLVM_STDCALL LLVMParseIRInContext(LLVMContextRef ContextRef,
                               LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutM,
                               char **OutMessage) {
   SMDiagnostic Diag;

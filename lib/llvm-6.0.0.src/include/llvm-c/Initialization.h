@@ -31,18 +31,18 @@ extern "C" {
  * @{
  */
 
-void LLVMInitializeCore(LLVMPassRegistryRef R);
-void LLVMInitializeTransformUtils(LLVMPassRegistryRef R);
-void LLVMInitializeScalarOpts(LLVMPassRegistryRef R);
-void LLVMInitializeObjCARCOpts(LLVMPassRegistryRef R);
-void LLVMInitializeVectorization(LLVMPassRegistryRef R);
-void LLVMInitializeInstCombine(LLVMPassRegistryRef R);
-void LLVMInitializeIPO(LLVMPassRegistryRef R);
-void LLVMInitializeInstrumentation(LLVMPassRegistryRef R);
-void LLVMInitializeAnalysis(LLVMPassRegistryRef R);
-void LLVMInitializeIPA(LLVMPassRegistryRef R);
-void LLVMInitializeCodeGen(LLVMPassRegistryRef R);
-void LLVMInitializeTarget(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeCore(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeTransformUtils(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeScalarOpts(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeObjCARCOpts(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeVectorization(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeInstCombine(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeIPO(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeInstrumentation(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeAnalysis(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeIPA(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeCodeGen(LLVMPassRegistryRef R);
+void LLVM_STDCALL LLVMInitializeTarget(LLVMPassRegistryRef R);
 
 /**
  * @}

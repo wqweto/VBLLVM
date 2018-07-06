@@ -14,6 +14,10 @@
 #ifndef LLVM_C_TYPES_H
 #define LLVM_C_TYPES_H
 
+#ifndef LLVM_STDCALL
+#define LLVM_STDCALL __stdcall
+#endif
+
 #include "llvm/Support/DataTypes.h"
 
 #ifdef __cplusplus

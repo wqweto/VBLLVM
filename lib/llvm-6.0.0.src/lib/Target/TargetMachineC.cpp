@@ -44,7 +44,7 @@ static LLVMTargetRef wrap(const Target * P) {
   return reinterpret_cast<LLVMTargetRef>(const_cast<Target*>(P));
 }
 
-LLVMTargetRef LLVMGetFirstTarget() {
+LLVMTargetRef LLVM_STDCALL LLVMGetFirstTarget() {
   if (TargetRegistry::targets().begin() == TargetRegistry::targets().end()) {
     return nullptr;
   }
@@ -52,18 +52,18 @@ LLVMTargetRef LLVMGetFirstTarget() {
   const Target *target = &*TargetRegistry::targets().begin();
   return wrap(target);
 }
-LLVMTargetRef LLVMGetNextTarget(LLVMTargetRef T) {
+LLVMTargetRef LLVM_STDCALL LLVMGetNextTarget(LLVMTargetRef T) {
   return wrap(unwrap(T)->getNext());
 }
 
-LLVMTargetRef LLVMGetTargetFromName(const char *Name) {
+LLVMTargetRef LLVM_STDCALL LLVMGetTargetFromName(const char *Name) {
   StringRef NameRef = Name;
   auto I = find_if(TargetRegistry::targets(),
                    [&](const Target &T) { return T.getName() == NameRef; });
   return I != TargetRegistry::targets().end() ? wrap(&*I) : nullptr;
 }
 
-LLVMBool LLVMGetTargetFromTriple(const char* TripleStr, LLVMTargetRef *T,
+LLVMBool LLVM_STDCALL LLVMGetTargetFromTriple(const char* TripleStr, LLVMTargetRef *T,
                                  char **ErrorMessage) {
   std::string Error;
 
@@ -79,27 +79,27 @@ LLVMBool LLVMGetTargetFromTriple(const char* TripleStr, LLVMTargetRef *T,
   return 0;
 }
 
-const char * LLVMGetTargetName(LLVMTargetRef T) {
+const char * LLVM_STDCALL LLVMGetTargetName(LLVMTargetRef T) {
   return unwrap(T)->getName();
 }
 
-const char * LLVMGetTargetDescription(LLVMTargetRef T) {
+const char * LLVM_STDCALL LLVMGetTargetDescription(LLVMTargetRef T) {
   return unwrap(T)->getShortDescription();
 }
 
-LLVMBool LLVMTargetHasJIT(LLVMTargetRef T) {
+LLVMBool LLVM_STDCALL LLVMTargetHasJIT(LLVMTargetRef T) {
   return unwrap(T)->hasJIT();
 }
 
-LLVMBool LLVMTargetHasTargetMachine(LLVMTargetRef T) {
+LLVMBool LLVM_STDCALL LLVMTargetHasTargetMachine(LLVMTargetRef T) {
   return unwrap(T)->hasTargetMachine();
 }
 
-LLVMBool LLVMTargetHasAsmBackend(LLVMTargetRef T) {
+LLVMBool LLVM_STDCALL LLVMTargetHasAsmBackend(LLVMTargetRef T) {
   return unwrap(T)->hasMCAsmBackend();
 }
 
-LLVMTargetMachineRef LLVMCreateTargetMachine(LLVMTargetRef T,
+LLVMTargetMachineRef LLVM_STDCALL LLVMCreateTargetMachine(LLVMTargetRef T,
         const char *Triple, const char *CPU, const char *Features,
         LLVMCodeGenOptLevel Level, LLVMRelocMode Reloc,
         LLVMCodeModel CodeModel) {
@@ -142,38 +142,38 @@ LLVMTargetMachineRef LLVMCreateTargetMachine(LLVMTargetRef T,
                                              OL, JIT));
 }
 
-void LLVMDisposeTargetMachine(LLVMTargetMachineRef T) { delete unwrap(T); }
+void LLVM_STDCALL LLVMDisposeTargetMachine(LLVMTargetMachineRef T) { delete unwrap(T); }
 
-LLVMTargetRef LLVMGetTargetMachineTarget(LLVMTargetMachineRef T) {
+LLVMTargetRef LLVM_STDCALL LLVMGetTargetMachineTarget(LLVMTargetMachineRef T) {
   const Target* target = &(unwrap(T)->getTarget());
   return wrap(target);
 }
 
-char* LLVMGetTargetMachineTriple(LLVMTargetMachineRef T) {
+char* LLVM_STDCALL LLVMGetTargetMachineTriple(LLVMTargetMachineRef T) {
   std::string StringRep = unwrap(T)->getTargetTriple().str();
   return strdup(StringRep.c_str());
 }
 
-char* LLVMGetTargetMachineCPU(LLVMTargetMachineRef T) {
+char* LLVM_STDCALL LLVMGetTargetMachineCPU(LLVMTargetMachineRef T) {
   std::string StringRep = unwrap(T)->getTargetCPU();
   return strdup(StringRep.c_str());
 }
 
-char* LLVMGetTargetMachineFeatureString(LLVMTargetMachineRef T) {
+char* LLVM_STDCALL LLVMGetTargetMachineFeatureString(LLVMTargetMachineRef T) {
   std::string StringRep = unwrap(T)->getTargetFeatureString();
   return strdup(StringRep.c_str());
 }
 
-void LLVMSetTargetMachineAsmVerbosity(LLVMTargetMachineRef T,
+void LLVM_STDCALL LLVMSetTargetMachineAsmVerbosity(LLVMTargetMachineRef T,
                                       LLVMBool VerboseAsm) {
   unwrap(T)->Options.MCOptions.AsmVerbose = VerboseAsm;
 }
 
-LLVMTargetDataRef LLVMCreateTargetDataLayout(LLVMTargetMachineRef T) {
+LLVMTargetDataRef LLVM_STDCALL LLVMCreateTargetDataLayout(LLVMTargetMachineRef T) {
   return wrap(new DataLayout(unwrap(T)->createDataLayout()));
 }
 
-static LLVMBool LLVMTargetMachineEmit(LLVMTargetMachineRef T, LLVMModuleRef M,
+static LLVMBool LLVM_STDCALL LLVMTargetMachineEmit(LLVMTargetMachineRef T, LLVMModuleRef M,
                                       raw_pwrite_stream &OS,
                                       LLVMCodeGenFileType codegen,
                                       char **ErrorMessage) {
@@ -207,7 +207,7 @@ static LLVMBool LLVMTargetMachineEmit(LLVMTargetMachineRef T, LLVMModuleRef M,
   return false;
 }
 
-LLVMBool LLVMTargetMachineEmitToFile(LLVMTargetMachineRef T, LLVMModuleRef M,
+LLVMBool LLVM_STDCALL LLVMTargetMachineEmitToFile(LLVMTargetMachineRef T, LLVMModuleRef M,
   char* Filename, LLVMCodeGenFileType codegen, char** ErrorMessage) {
   std::error_code EC;
   raw_fd_ostream dest(Filename, EC, sys::fs::F_None);
@@ -220,7 +220,7 @@ LLVMBool LLVMTargetMachineEmitToFile(LLVMTargetMachineRef T, LLVMModuleRef M,
   return Result;
 }
 
-LLVMBool LLVMTargetMachineEmitToMemoryBuffer(LLVMTargetMachineRef T,
+LLVMBool LLVM_STDCALL LLVMTargetMachineEmitToMemoryBuffer(LLVMTargetMachineRef T,
   LLVMModuleRef M, LLVMCodeGenFileType codegen, char** ErrorMessage,
   LLVMMemoryBufferRef *OutMemBuf) {
   SmallString<0> CodeString;
@@ -233,11 +233,11 @@ LLVMBool LLVMTargetMachineEmitToMemoryBuffer(LLVMTargetMachineRef T,
   return Result;
 }
 
-char *LLVMGetDefaultTargetTriple(void) {
+char *LLVM_STDCALL LLVMGetDefaultTargetTriple(void) {
   return strdup(sys::getDefaultTargetTriple().c_str());
 }
 
-void LLVMAddAnalysisPasses(LLVMTargetMachineRef T, LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddAnalysisPasses(LLVMTargetMachineRef T, LLVMPassManagerRef PM) {
   unwrap(PM)->add(
       createTargetTransformInfoWrapperPass(unwrap(T)->getTargetIRAnalysis()));
 }

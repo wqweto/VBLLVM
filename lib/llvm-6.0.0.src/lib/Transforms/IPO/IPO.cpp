@@ -60,7 +60,7 @@ void llvm::initializeIPO(PassRegistry &Registry) {
   initializeWholeProgramDevirtPass(Registry);
 }
 
-void LLVMInitializeIPO(LLVMPassRegistryRef R) {
+void LLVM_STDCALL LLVMInitializeIPO(LLVMPassRegistryRef R) {
   initializeIPO(*unwrap(R));
 }
 

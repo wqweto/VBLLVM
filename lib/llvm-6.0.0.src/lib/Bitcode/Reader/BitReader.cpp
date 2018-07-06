@@ -22,18 +22,18 @@ using namespace llvm;
 /* Builds a module from the bitcode in the specified memory buffer, returning a
    reference to the module via the OutModule parameter. Returns 0 on success.
    Optionally returns a human-readable error message via OutMessage. */
-LLVMBool LLVMParseBitcode(LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutModule,
+LLVMBool LLVM_STDCALL LLVMParseBitcode(LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutModule,
                           char **OutMessage) {
   return LLVMParseBitcodeInContext(LLVMGetGlobalContext(), MemBuf, OutModule,
                                    OutMessage);
 }
 
-LLVMBool LLVMParseBitcode2(LLVMMemoryBufferRef MemBuf,
+LLVMBool LLVM_STDCALL LLVMParseBitcode2(LLVMMemoryBufferRef MemBuf,
                            LLVMModuleRef *OutModule) {
   return LLVMParseBitcodeInContext2(LLVMGetGlobalContext(), MemBuf, OutModule);
 }
 
-LLVMBool LLVMParseBitcodeInContext(LLVMContextRef ContextRef,
+LLVMBool LLVM_STDCALL LLVMParseBitcodeInContext(LLVMContextRef ContextRef,
                                    LLVMMemoryBufferRef MemBuf,
                                    LLVMModuleRef *OutModule,
                                    char **OutMessage) {
@@ -56,7 +56,7 @@ LLVMBool LLVMParseBitcodeInContext(LLVMContextRef ContextRef,
   return 0;
 }
 
-LLVMBool LLVMParseBitcodeInContext2(LLVMContextRef ContextRef,
+LLVMBool LLVM_STDCALL LLVMParseBitcodeInContext2(LLVMContextRef ContextRef,
                                     LLVMMemoryBufferRef MemBuf,
                                     LLVMModuleRef *OutModule) {
   MemoryBufferRef Buf = unwrap(MemBuf)->getMemBufferRef();
@@ -76,7 +76,7 @@ LLVMBool LLVMParseBitcodeInContext2(LLVMContextRef ContextRef,
 /* Reads a module from the specified path, returning via the OutModule parameter
    a module provider which performs lazy deserialization. Returns 0 on success.
    Optionally returns a human-readable error message via OutMessage. */
-LLVMBool LLVMGetBitcodeModuleInContext(LLVMContextRef ContextRef,
+LLVMBool LLVM_STDCALL LLVMGetBitcodeModuleInContext(LLVMContextRef ContextRef,
                                        LLVMMemoryBufferRef MemBuf,
                                        LLVMModuleRef *OutM, char **OutMessage) {
   LLVMContext &Ctx = *unwrap(ContextRef);
@@ -103,7 +103,7 @@ LLVMBool LLVMGetBitcodeModuleInContext(LLVMContextRef ContextRef,
   return 0;
 }
 
-LLVMBool LLVMGetBitcodeModuleInContext2(LLVMContextRef ContextRef,
+LLVMBool LLVM_STDCALL LLVMGetBitcodeModuleInContext2(LLVMContextRef ContextRef,
                                         LLVMMemoryBufferRef MemBuf,
                                         LLVMModuleRef *OutM) {
   LLVMContext &Ctx = *unwrap(ContextRef);
@@ -122,13 +122,13 @@ LLVMBool LLVMGetBitcodeModuleInContext2(LLVMContextRef ContextRef,
   return 0;
 }
 
-LLVMBool LLVMGetBitcodeModule(LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutM,
+LLVMBool LLVM_STDCALL LLVMGetBitcodeModule(LLVMMemoryBufferRef MemBuf, LLVMModuleRef *OutM,
                               char **OutMessage) {
   return LLVMGetBitcodeModuleInContext(LLVMGetGlobalContext(), MemBuf, OutM,
                                        OutMessage);
 }
 
-LLVMBool LLVMGetBitcodeModule2(LLVMMemoryBufferRef MemBuf,
+LLVMBool LLVM_STDCALL LLVMGetBitcodeModule2(LLVMMemoryBufferRef MemBuf,
                                LLVMModuleRef *OutM) {
   return LLVMGetBitcodeModuleInContext2(LLVMGetGlobalContext(), MemBuf, OutM);
 }

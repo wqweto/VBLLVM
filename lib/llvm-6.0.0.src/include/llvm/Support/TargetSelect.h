@@ -18,29 +18,33 @@
 
 #include "llvm/Config/llvm-config.h"
 
+#ifndef LLVM_STDCALL
+#define LLVM_STDCALL __stdcall
+#endif
+
 extern "C" {
   // Declare all of the target-initialization functions that are available.
-#define LLVM_TARGET(TargetName) void LLVMInitialize##TargetName##TargetInfo();
+#define LLVM_TARGET(TargetName) void LLVM_STDCALL LLVMInitialize##TargetName##TargetInfo();
 #include "llvm/Config/Targets.def"
 
-#define LLVM_TARGET(TargetName) void LLVMInitialize##TargetName##Target();
+#define LLVM_TARGET(TargetName) void LLVM_STDCALL LLVMInitialize##TargetName##Target();
 #include "llvm/Config/Targets.def"
 
   // Declare all of the target-MC-initialization functions that are available.
-#define LLVM_TARGET(TargetName) void LLVMInitialize##TargetName##TargetMC();
+#define LLVM_TARGET(TargetName) void LLVM_STDCALL LLVMInitialize##TargetName##TargetMC();
 #include "llvm/Config/Targets.def"
 
   // Declare all of the available assembly printer initialization functions.
-#define LLVM_ASM_PRINTER(TargetName) void LLVMInitialize##TargetName##AsmPrinter();
+#define LLVM_ASM_PRINTER(TargetName) void LLVM_STDCALL LLVMInitialize##TargetName##AsmPrinter();
 #include "llvm/Config/AsmPrinters.def"
 
   // Declare all of the available assembly parser initialization functions.
-#define LLVM_ASM_PARSER(TargetName) void LLVMInitialize##TargetName##AsmParser();
+#define LLVM_ASM_PARSER(TargetName) void LLVM_STDCALL LLVMInitialize##TargetName##AsmParser();
 #include "llvm/Config/AsmParsers.def"
 
   // Declare all of the available disassembler initialization functions.
 #define LLVM_DISASSEMBLER(TargetName) \
-  void LLVMInitialize##TargetName##Disassembler();
+  void LLVM_STDCALL LLVMInitialize##TargetName##Disassembler();
 #include "llvm/Config/Disassemblers.def"
 }
 

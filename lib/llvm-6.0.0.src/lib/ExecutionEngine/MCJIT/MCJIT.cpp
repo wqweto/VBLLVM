@@ -36,7 +36,7 @@ static struct RegisterJIT {
 
 }
 
-extern "C" void LLVMLinkInMCJIT() {
+extern "C" void LLVM_STDCALL LLVMLinkInMCJIT() {
 }
 
 ExecutionEngine*

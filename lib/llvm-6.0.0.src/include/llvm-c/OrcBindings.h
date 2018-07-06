@@ -33,8 +33,8 @@ typedef struct LLVMOpaqueSharedModule *LLVMSharedModuleRef;
 typedef struct LLVMOrcOpaqueJITStack *LLVMOrcJITStackRef;
 typedef uint32_t LLVMOrcModuleHandle;
 typedef uint64_t LLVMOrcTargetAddress;
-typedef uint64_t (*LLVMOrcSymbolResolverFn)(const char *Name, void *LookupCtx);
-typedef uint64_t (*LLVMOrcLazyCompileCallbackFn)(LLVMOrcJITStackRef JITStack,
+typedef uint64_t (LLVM_STDCALL *LLVMOrcSymbolResolverFn)(const char *Name, void *LookupCtx);
+typedef uint64_t (LLVM_STDCALL *LLVMOrcLazyCompileCallbackFn)(LLVMOrcJITStackRef JITStack,
                                                  void *CallbackCtx);
 
 typedef enum { LLVMOrcErrSuccess = 0, LLVMOrcErrGeneric } LLVMOrcErrorCode;
@@ -54,7 +54,7 @@ typedef enum { LLVMOrcErrSuccess = 0, LLVMOrcErrGeneric } LLVMOrcErrorCode;
  * deleted when the last shared pointer owner relinquishes it.
  */
 
-LLVMSharedModuleRef LLVMOrcMakeSharedModule(LLVMModuleRef Mod);
+LLVMSharedModuleRef LLVM_STDCALL LLVMOrcMakeSharedModule(LLVMModuleRef Mod);
 
 /**
  * Dispose of a shared module.
@@ -64,7 +64,7 @@ LLVMSharedModuleRef LLVMOrcMakeSharedModule(LLVMModuleRef Mod);
  * shared pointers.
  */
 
-void LLVMOrcDisposeSharedModuleRef(LLVMSharedModuleRef SharedMod);
+void LLVM_STDCALL LLVMOrcDisposeSharedModuleRef(LLVMSharedModuleRef SharedMod);
 
 /**
  * Create an ORC JIT stack.
@@ -75,7 +75,7 @@ void LLVMOrcDisposeSharedModuleRef(LLVMSharedModuleRef SharedMod);
  * client should not attempt to dispose of the Target Machine, or it will result
  * in a double-free.
  */
-LLVMOrcJITStackRef LLVMOrcCreateInstance(LLVMTargetMachineRef TM);
+LLVMOrcJITStackRef LLVM_STDCALL LLVMOrcCreateInstance(LLVMTargetMachineRef TM);
 
 /**
  * Get the error message for the most recent error (if any).
@@ -83,25 +83,24 @@ LLVMOrcJITStackRef LLVMOrcCreateInstance(LLVMTargetMachineRef TM);
  * This message is owned by the ORC JIT Stack and will be freed when the stack
  * is disposed of by LLVMOrcDisposeInstance.
  */
-const char *LLVMOrcGetErrorMsg(LLVMOrcJITStackRef JITStack);
+const char *LLVM_STDCALL LLVMOrcGetErrorMsg(LLVMOrcJITStackRef JITStack);
 
 /**
  * Mangle the given symbol.
  * Memory will be allocated for MangledSymbol to hold the result. The client
  */
-void LLVMOrcGetMangledSymbol(LLVMOrcJITStackRef JITStack, char **MangledSymbol,
+void LLVM_STDCALL LLVMOrcGetMangledSymbol(LLVMOrcJITStackRef JITStack, char **MangledSymbol,
                              const char *Symbol);
 
 /**
  * Dispose of a mangled symbol.
  */
-void LLVMOrcDisposeMangledSymbol(char *MangledSymbol);
+void LLVM_STDCALL LLVMOrcDisposeMangledSymbol(char *MangledSymbol);
 
 /**
  * Create a lazy compile callback.
  */
-LLVMOrcErrorCode
-LLVMOrcCreateLazyCompileCallback(LLVMOrcJITStackRef JITStack,
+LLVMOrcErrorCode LLVM_STDCALL LLVMOrcCreateLazyCompileCallback(LLVMOrcJITStackRef JITStack,
                                  LLVMOrcTargetAddress *RetAddr,
                                  LLVMOrcLazyCompileCallbackFn Callback,
                                  void *CallbackCtx);
@@ -109,22 +108,21 @@ LLVMOrcCreateLazyCompileCallback(LLVMOrcJITStackRef JITStack,
 /**
  * Create a named indirect call stub.
  */
-LLVMOrcErrorCode LLVMOrcCreateIndirectStub(LLVMOrcJITStackRef JITStack,
+LLVMOrcErrorCode LLVM_STDCALL LLVMOrcCreateIndirectStub(LLVMOrcJITStackRef JITStack,
                                            const char *StubName,
                                            LLVMOrcTargetAddress InitAddr);
 
 /**
  * Set the pointer for the given indirect stub.
  */
-LLVMOrcErrorCode LLVMOrcSetIndirectStubPointer(LLVMOrcJITStackRef JITStack,
+LLVMOrcErrorCode LLVM_STDCALL LLVMOrcSetIndirectStubPointer(LLVMOrcJITStackRef JITStack,
                                                const char *StubName,
                                                LLVMOrcTargetAddress NewAddr);
 
 /**
  * Add module to be eagerly compiled.
  */
-LLVMOrcErrorCode
-LLVMOrcAddEagerlyCompiledIR(LLVMOrcJITStackRef JITStack,
+LLVMOrcErrorCode LLVM_STDCALL LLVMOrcAddEagerlyCompiledIR(LLVMOrcJITStackRef JITStack,
                             LLVMOrcModuleHandle *RetHandle,
                             LLVMSharedModuleRef Mod,
                             LLVMOrcSymbolResolverFn SymbolResolver,
@@ -133,8 +131,7 @@ LLVMOrcAddEagerlyCompiledIR(LLVMOrcJITStackRef JITStack,
 /**
  * Add module to be lazily compiled one function at a time.
  */
-LLVMOrcErrorCode
-LLVMOrcAddLazilyCompiledIR(LLVMOrcJITStackRef JITStack,
+LLVMOrcErrorCode LLVM_STDCALL LLVMOrcAddLazilyCompiledIR(LLVMOrcJITStackRef JITStack,
                            LLVMOrcModuleHandle *RetHandle,
                            LLVMSharedModuleRef Mod,
                            LLVMOrcSymbolResolverFn SymbolResolver,
@@ -148,7 +145,7 @@ LLVMOrcAddLazilyCompiledIR(LLVMOrcJITStackRef JITStack,
  * Clients should *not* dispose of the 'Obj' argument: the JIT will manage it
  * from this call onwards.
  */
-LLVMOrcErrorCode LLVMOrcAddObjectFile(LLVMOrcJITStackRef JITStack,
+LLVMOrcErrorCode LLVM_STDCALL LLVMOrcAddObjectFile(LLVMOrcJITStackRef JITStack,
                                       LLVMOrcModuleHandle *RetHandle,
                                       LLVMMemoryBufferRef Obj,
                                       LLVMOrcSymbolResolverFn SymbolResolver,
@@ -160,20 +157,20 @@ LLVMOrcErrorCode LLVMOrcAddObjectFile(LLVMOrcJITStackRef JITStack,
  * This works for all modules that can be added via OrcAdd*, including object
  * files.
  */
-LLVMOrcErrorCode LLVMOrcRemoveModule(LLVMOrcJITStackRef JITStack,
+LLVMOrcErrorCode LLVM_STDCALL LLVMOrcRemoveModule(LLVMOrcJITStackRef JITStack,
                                      LLVMOrcModuleHandle H);
 
 /**
  * Get symbol address from JIT instance.
  */
-LLVMOrcErrorCode LLVMOrcGetSymbolAddress(LLVMOrcJITStackRef JITStack,
+LLVMOrcErrorCode LLVM_STDCALL LLVMOrcGetSymbolAddress(LLVMOrcJITStackRef JITStack,
                                          LLVMOrcTargetAddress *RetAddr,
                                          const char *SymbolName);
 
 /**
  * Dispose of an ORC JIT stack.
  */
-LLVMOrcErrorCode LLVMOrcDisposeInstance(LLVMOrcJITStackRef JITStack);
+LLVMOrcErrorCode LLVM_STDCALL LLVMOrcDisposeInstance(LLVMOrcJITStackRef JITStack);
 
 #ifdef __cplusplus
 }

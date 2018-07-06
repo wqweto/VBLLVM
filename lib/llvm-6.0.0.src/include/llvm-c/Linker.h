@@ -32,7 +32,7 @@ typedef enum {
  * The return value is true if an error occurred, false otherwise.
  * Use the diagnostic handler to get any diagnostic message.
 */
-LLVMBool LLVMLinkModules2(LLVMModuleRef Dest, LLVMModuleRef Src);
+LLVMBool LLVM_STDCALL LLVMLinkModules2(LLVMModuleRef Dest, LLVMModuleRef Src);
 
 #ifdef __cplusplus
 }

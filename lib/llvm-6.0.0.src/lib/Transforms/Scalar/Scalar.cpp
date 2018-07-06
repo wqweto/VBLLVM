@@ -104,7 +104,7 @@ void llvm::initializeScalarOpts(PassRegistry &Registry) {
   initializePostInlineEntryExitInstrumenterPass(Registry);
 }
 
-void LLVMInitializeScalarOpts(LLVMPassRegistryRef R) {
+void LLVM_STDCALL LLVMInitializeScalarOpts(LLVMPassRegistryRef R) {
   initializeScalarOpts(*unwrap(R));
 }
 

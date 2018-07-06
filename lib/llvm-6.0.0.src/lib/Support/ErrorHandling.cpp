@@ -201,12 +201,12 @@ static void bindingsErrorHandler(void *user_data, const std::string& reason,
   handler(reason.c_str());
 }
 
-void LLVMInstallFatalErrorHandler(LLVMFatalErrorHandler Handler) {
+void LLVM_STDCALL LLVMInstallFatalErrorHandler(LLVMFatalErrorHandler Handler) {
   install_fatal_error_handler(bindingsErrorHandler,
                               LLVM_EXTENSION reinterpret_cast<void *>(Handler));
 }
 
-void LLVMResetFatalErrorHandler() {
+void LLVM_STDCALL LLVMResetFatalErrorHandler() {
   remove_fatal_error_handler();
 }
 

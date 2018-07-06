@@ -75,6 +75,6 @@ void llvm::initializeInstrumentation(PassRegistry &Registry) {
 
 /// LLVMInitializeInstrumentation - C binding for
 /// initializeInstrumentation.
-void LLVMInitializeInstrumentation(LLVMPassRegistryRef R) {
+void LLVM_STDCALL LLVMInitializeInstrumentation(LLVMPassRegistryRef R) {
   initializeInstrumentation(*unwrap(R));
 }

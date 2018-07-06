@@ -40,6 +40,6 @@ void llvm::initializeTransformUtils(PassRegistry &Registry) {
 }
 
 /// LLVMInitializeTransformUtils - C binding for initializeTransformUtilsPasses.
-void LLVMInitializeTransformUtils(LLVMPassRegistryRef R) {
+void LLVM_STDCALL LLVMInitializeTransformUtils(LLVMPassRegistryRef R) {
   initializeTransformUtils(*unwrap(R));
 }

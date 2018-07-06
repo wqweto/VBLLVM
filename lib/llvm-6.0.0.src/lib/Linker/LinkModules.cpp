@@ -599,7 +599,7 @@ bool Linker::linkModules(
 // C API.
 //===----------------------------------------------------------------------===//
 
-LLVMBool LLVMLinkModules2(LLVMModuleRef Dest, LLVMModuleRef Src) {
+LLVMBool LLVM_STDCALL LLVMLinkModules2(LLVMModuleRef Dest, LLVMModuleRef Src) {
   Module *D = unwrap(Dest);
   std::unique_ptr<Module> M(unwrap(Src));
   return Linker::linkModules(*D, std::move(M));

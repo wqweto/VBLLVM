@@ -30,18 +30,18 @@ void llvm::initializeVectorization(PassRegistry &Registry) {
   initializeLoadStoreVectorizerPass(Registry);
 }
 
-void LLVMInitializeVectorization(LLVMPassRegistryRef R) {
+void LLVM_STDCALL LLVMInitializeVectorization(LLVMPassRegistryRef R) {
   initializeVectorization(*unwrap(R));
 }
 
 // DEPRECATED: Remove after the LLVM 5 release.
-void LLVMAddBBVectorizePass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddBBVectorizePass(LLVMPassManagerRef PM) {
 }
 
-void LLVMAddLoopVectorizePass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLoopVectorizePass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoopVectorizePass());
 }
 
-void LLVMAddSLPVectorizePass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddSLPVectorizePass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createSLPVectorizerPass());
 }

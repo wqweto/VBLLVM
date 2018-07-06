@@ -25,7 +25,7 @@
 using namespace llvm;
 
 // Avoid including "llvm-c/Core.h" for compile time, fwd-declare this instead.
-extern "C" LLVMContextRef LLVMGetGlobalContext(void);
+extern "C" LLVMContextRef LLVM_STDCALL LLVMGetGlobalContext(void);
 
 inline TargetLibraryInfoImpl *unwrap(LLVMTargetLibraryInfoRef P) {
   return reinterpret_cast<TargetLibraryInfoImpl*>(P);
@@ -41,100 +41,100 @@ void llvm::initializeTarget(PassRegistry &Registry) {
   initializeTargetTransformInfoWrapperPassPass(Registry);
 }
 
-void LLVMInitializeTarget(LLVMPassRegistryRef R) {
+void LLVM_STDCALL LLVMInitializeTarget(LLVMPassRegistryRef R) {
   initializeTarget(*unwrap(R));
 }
 
-LLVMTargetDataRef LLVMGetModuleDataLayout(LLVMModuleRef M) {
+LLVMTargetDataRef LLVM_STDCALL LLVMGetModuleDataLayout(LLVMModuleRef M) {
   return wrap(&unwrap(M)->getDataLayout());
 }
 
-void LLVMSetModuleDataLayout(LLVMModuleRef M, LLVMTargetDataRef DL) {
+void LLVM_STDCALL LLVMSetModuleDataLayout(LLVMModuleRef M, LLVMTargetDataRef DL) {
   unwrap(M)->setDataLayout(*unwrap(DL));
 }
 
-LLVMTargetDataRef LLVMCreateTargetData(const char *StringRep) {
+LLVMTargetDataRef LLVM_STDCALL LLVMCreateTargetData(const char *StringRep) {
   return wrap(new DataLayout(StringRep));
 }
 
-void LLVMDisposeTargetData(LLVMTargetDataRef TD) {
+void LLVM_STDCALL LLVMDisposeTargetData(LLVMTargetDataRef TD) {
   delete unwrap(TD);
 }
 
-void LLVMAddTargetLibraryInfo(LLVMTargetLibraryInfoRef TLI,
+void LLVM_STDCALL LLVMAddTargetLibraryInfo(LLVMTargetLibraryInfoRef TLI,
                               LLVMPassManagerRef PM) {
   unwrap(PM)->add(new TargetLibraryInfoWrapperPass(*unwrap(TLI)));
 }
 
-char *LLVMCopyStringRepOfTargetData(LLVMTargetDataRef TD) {
+char *LLVM_STDCALL LLVMCopyStringRepOfTargetData(LLVMTargetDataRef TD) {
   std::string StringRep = unwrap(TD)->getStringRepresentation();
   return strdup(StringRep.c_str());
 }
 
-LLVMByteOrdering LLVMByteOrder(LLVMTargetDataRef TD) {
+LLVMByteOrdering LLVM_STDCALL LLVMByteOrder(LLVMTargetDataRef TD) {
   return unwrap(TD)->isLittleEndian() ? LLVMLittleEndian : LLVMBigEndian;
 }
 
-unsigned LLVMPointerSize(LLVMTargetDataRef TD) {
+unsigned LLVM_STDCALL LLVMPointerSize(LLVMTargetDataRef TD) {
   return unwrap(TD)->getPointerSize(0);
 }
 
-unsigned LLVMPointerSizeForAS(LLVMTargetDataRef TD, unsigned AS) {
+unsigned LLVM_STDCALL LLVMPointerSizeForAS(LLVMTargetDataRef TD, unsigned AS) {
   return unwrap(TD)->getPointerSize(AS);
 }
 
-LLVMTypeRef LLVMIntPtrType(LLVMTargetDataRef TD) {
+LLVMTypeRef LLVM_STDCALL LLVMIntPtrType(LLVMTargetDataRef TD) {
   return wrap(unwrap(TD)->getIntPtrType(*unwrap(LLVMGetGlobalContext())));
 }
 
-LLVMTypeRef LLVMIntPtrTypeForAS(LLVMTargetDataRef TD, unsigned AS) {
+LLVMTypeRef LLVM_STDCALL LLVMIntPtrTypeForAS(LLVMTargetDataRef TD, unsigned AS) {
   return wrap(unwrap(TD)->getIntPtrType(*unwrap(LLVMGetGlobalContext()), AS));
 }
 
-LLVMTypeRef LLVMIntPtrTypeInContext(LLVMContextRef C, LLVMTargetDataRef TD) {
+LLVMTypeRef LLVM_STDCALL LLVMIntPtrTypeInContext(LLVMContextRef C, LLVMTargetDataRef TD) {
   return wrap(unwrap(TD)->getIntPtrType(*unwrap(C)));
 }
 
-LLVMTypeRef LLVMIntPtrTypeForASInContext(LLVMContextRef C, LLVMTargetDataRef TD, unsigned AS) {
+LLVMTypeRef LLVM_STDCALL LLVMIntPtrTypeForASInContext(LLVMContextRef C, LLVMTargetDataRef TD, unsigned AS) {
   return wrap(unwrap(TD)->getIntPtrType(*unwrap(C), AS));
 }
 
-unsigned long long LLVMSizeOfTypeInBits(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
+unsigned long long LLVM_STDCALL LLVMSizeOfTypeInBits(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
   return unwrap(TD)->getTypeSizeInBits(unwrap(Ty));
 }
 
-unsigned long long LLVMStoreSizeOfType(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
+unsigned long long LLVM_STDCALL LLVMStoreSizeOfType(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
   return unwrap(TD)->getTypeStoreSize(unwrap(Ty));
 }
 
-unsigned long long LLVMABISizeOfType(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
+unsigned long long LLVM_STDCALL LLVMABISizeOfType(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
   return unwrap(TD)->getTypeAllocSize(unwrap(Ty));
 }
 
-unsigned LLVMABIAlignmentOfType(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
+unsigned LLVM_STDCALL LLVMABIAlignmentOfType(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
   return unwrap(TD)->getABITypeAlignment(unwrap(Ty));
 }
 
-unsigned LLVMCallFrameAlignmentOfType(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
+unsigned LLVM_STDCALL LLVMCallFrameAlignmentOfType(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
   return unwrap(TD)->getABITypeAlignment(unwrap(Ty));
 }
 
-unsigned LLVMPreferredAlignmentOfType(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
+unsigned LLVM_STDCALL LLVMPreferredAlignmentOfType(LLVMTargetDataRef TD, LLVMTypeRef Ty) {
   return unwrap(TD)->getPrefTypeAlignment(unwrap(Ty));
 }
 
-unsigned LLVMPreferredAlignmentOfGlobal(LLVMTargetDataRef TD,
+unsigned LLVM_STDCALL LLVMPreferredAlignmentOfGlobal(LLVMTargetDataRef TD,
                                         LLVMValueRef GlobalVar) {
   return unwrap(TD)->getPreferredAlignment(unwrap<GlobalVariable>(GlobalVar));
 }
 
-unsigned LLVMElementAtOffset(LLVMTargetDataRef TD, LLVMTypeRef StructTy,
+unsigned LLVM_STDCALL LLVMElementAtOffset(LLVMTargetDataRef TD, LLVMTypeRef StructTy,
                              unsigned long long Offset) {
   StructType *STy = unwrap<StructType>(StructTy);
   return unwrap(TD)->getStructLayout(STy)->getElementContainingOffset(Offset);
 }
 
-unsigned long long LLVMOffsetOfElement(LLVMTargetDataRef TD, LLVMTypeRef StructTy,
+unsigned long long LLVM_STDCALL LLVMOffsetOfElement(LLVMTargetDataRef TD, LLVMTypeRef StructTy,
                                        unsigned Element) {
   StructType *STy = unwrap<StructType>(StructTy);
   return unwrap(TD)->getStructLayout(STy)->getElementOffset(Element);

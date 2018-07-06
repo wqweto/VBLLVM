@@ -42,7 +42,7 @@ using namespace llvm;
 // functions can all be passed as NULL.  If successful, this returns a
 // disassembler context.  If not, it returns NULL.
 //
-LLVMDisasmContextRef
+LLVMDisasmContextRef LLVM_STDCALL 
 LLVMCreateDisasmCPUFeatures(const char *TT, const char *CPU,
                             const char *Features, void *DisInfo, int TagType,
                             LLVMOpInfoCallback GetOpInfo,
@@ -107,7 +107,7 @@ LLVMCreateDisasmCPUFeatures(const char *TT, const char *CPU,
   return DC;
 }
 
-LLVMDisasmContextRef
+LLVMDisasmContextRef LLVM_STDCALL 
 LLVMCreateDisasmCPU(const char *TT, const char *CPU, void *DisInfo, int TagType,
                     LLVMOpInfoCallback GetOpInfo,
                     LLVMSymbolLookupCallback SymbolLookUp) {
@@ -115,7 +115,7 @@ LLVMCreateDisasmCPU(const char *TT, const char *CPU, void *DisInfo, int TagType,
                                      SymbolLookUp);
 }
 
-LLVMDisasmContextRef LLVMCreateDisasm(const char *TT, void *DisInfo,
+LLVMDisasmContextRef LLVM_STDCALL LLVMCreateDisasm(const char *TT, void *DisInfo,
                                       int TagType, LLVMOpInfoCallback GetOpInfo,
                                       LLVMSymbolLookupCallback SymbolLookUp) {
   return LLVMCreateDisasmCPUFeatures(TT, "", "", DisInfo, TagType, GetOpInfo,
@@ -125,7 +125,7 @@ LLVMDisasmContextRef LLVMCreateDisasm(const char *TT, void *DisInfo,
 //
 // LLVMDisasmDispose() disposes of the disassembler specified by the context.
 //
-void LLVMDisasmDispose(LLVMDisasmContextRef DCR){
+void LLVM_STDCALL LLVMDisasmDispose(LLVMDisasmContextRef DCR){
   LLVMDisasmContext *DC = static_cast<LLVMDisasmContext *>(DCR);
   delete DC;
 }
@@ -245,7 +245,7 @@ static void emitLatency(LLVMDisasmContext *DC, const MCInst &Inst) {
 // returns zero the caller will have to pick how many bytes they want to step
 // over by printing a .byte, .long etc. to continue.
 //
-size_t LLVMDisasmInstruction(LLVMDisasmContextRef DCR, uint8_t *Bytes,
+size_t LLVM_STDCALL LLVMDisasmInstruction(LLVMDisasmContextRef DCR, uint8_t *Bytes,
                              uint64_t BytesSize, uint64_t PC, char *OutString,
                              size_t OutStringSize){
   LLVMDisasmContext *DC = static_cast<LLVMDisasmContext *>(DCR);
@@ -295,7 +295,7 @@ size_t LLVMDisasmInstruction(LLVMDisasmContextRef DCR, uint8_t *Bytes,
 // LLVMSetDisasmOptions() sets the disassembler's options.  It returns 1 if it
 // can set all the Options and 0 otherwise.
 //
-int LLVMSetDisasmOptions(LLVMDisasmContextRef DCR, uint64_t Options){
+int LLVM_STDCALL LLVMSetDisasmOptions(LLVMDisasmContextRef DCR, uint64_t Options){
   if (Options & LLVMDisassembler_Option_UseMarkup){
       LLVMDisasmContext *DC = static_cast<LLVMDisasmContext *>(DCR);
       MCInstPrinter *IP = DC->getIP();
