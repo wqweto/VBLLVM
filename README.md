@@ -1,2 +1,20 @@
 # VBLLVM
 LLVM 6.0 bindings for VB6
+
+### Description
+
+This repo contains a `stdcall` port of LLVM C API exports to be accessible from VB6 projects.
+
+### LLVM preparation
+
+LLVM sources are extracted in `lib/llvm-6.0.0.src` and `stdcall` patch is applied in commit `cd1946d`.
+
+Use `lib/build-release/setup.bat` to compile LLVM release build in `lib/install-release`.
+
+Use `lib/build-debug/setup.bat` to compile LLVM debug build in `lib/install-debug`.
+
+Use `lib/install-release/lib/dump-def.bat` to collect exports for `src/VBLLVM.def`
+
+### Source usage
+
+Use `src/VBLLVM.sln` to build `bin/Release/VBLLVM.dll` and `bin/Debug/VBLLVM.dll` from `.lib` files in `lib/install-release` and `lib/install-debug`
