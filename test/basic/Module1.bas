@@ -52,8 +52,8 @@ Private Declare Function LLVMGetPointerToGlobal Lib "vbllvm" (ByVal hEE As Long,
 Private Declare Function LLVMPrintModuleToString Lib "vbllvm" (ByVal hM As Long) As Long
                                
 Sub Main()
-'    LoadLibrary "C:\Work\Temp\VBLLVM\bin\Release\VBLLVM.dll"
-    LoadLibrary "C:\Work\Temp\VBLLVM\bin\Debug\VBLLVM.dll"
+'    LoadLibrary App.Path & "\..\..\bin\Release\VBLLVM.dll"
+    LoadLibrary App.Path & "\..\..\bin\Debug\VBLLVM.dll"
     pvTestJIT
 End Sub
 
@@ -129,7 +129,7 @@ Private Function pvBuildFunction(hMod As Long, hFnSum As Long) As Long
     hValueTmp = LLVMBuildAdd(hBuilder, LLVMGetParam(hFnSum, 0), LLVMGetParam(hFnSum, 1), "tmp")
     Call LLVMBuildRet(hBuilder, hValueTmp)
     If LLVMVerifyModule(hTempMod, LLVMAbortProcessAction, lMsgPtr) <> 0 Then
-        ConsoleError "LLVMVerifyModule: %1", pvToString(lMsgPtr)
+        ConsoleError "LLVMVerifyModule: %1" & vbCrLf, pvToString(lMsgPtr)
         Call LLVMDisposeMessage(lMsgPtr)
         GoTo QH
     End If
