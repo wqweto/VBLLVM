@@ -7,7 +7,7 @@ This repo contains a `stdcall` port of LLVM C API exports to be accessible from 
 
 ### LLVM preparation
 
-LLVM sources are extracted in `lib/llvm-6.0.0.src` and `stdcall` patch is applied in commit [`cd1946d`](https://github.com/wqweto/VBLLVM/commit/cd1946dfd8e83cc7ddc7e84d277cffd01f716712).
+LLVM sources are extracted in `lib/llvm-6.0.0.src` and `stdcall` patch is applied in commits [`cd1946d`](https://github.com/wqweto/VBLLVM/commit/cd1946dfd8e83cc7ddc7e84d277cffd01f716712) and [`e1e1356`](https://github.com/wqweto/VBLLVM/commit/e1e1356a6ac7592398937ac000fdde7e5a7d8670).
 
 LLVM build uses [cmake](https://cmake.org/download/), [python3.x](https://www.python.org/downloads/) and Visual Studio 2015 so make sure you have these pre-installed.
 
