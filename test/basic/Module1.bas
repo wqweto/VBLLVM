@@ -12,7 +12,7 @@ Private Const STD_OUTPUT_HANDLE             As Long = -11&
 Private Const STD_ERROR_HANDLE              As Long = -12&
 '--- for LLVMVerifyModule
 Private Const LLVMAbortProcessAction        As Long = 0
-Private Const LLVMX86_StdCall               As Long = 64
+Private Const LLVMX86StdcallCallConv        As Long = 64
 
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (dest As Any, src As Any, ByVal l As Long)
 Private Declare Function lstrlen Lib "kernel32" Alias "lstrlenA" (ByVal lpString As Long) As Long
@@ -109,7 +109,7 @@ QH:
 End Sub
 
 Private Function pvBuildFunction(hMod As Long, hFnSum As Long) As Long
-    Dim hTempMod        As Long
+    Dim hTempMod        As LLVMModuleRef
     Dim aFnParams(0 To 1) As Long
     Dim hTypeFn         As Long
     Dim hBlockEntry     As Long
@@ -122,7 +122,7 @@ Private Function pvBuildFunction(hMod As Long, hFnSum As Long) As Long
     aFnParams(1) = LLVMInt32Type()
     hTypeFn = LLVMFunctionType(LLVMInt32Type(), aFnParams(0), 2, 0)
     hFnSum = LLVMAddFunction(hTempMod, "sum", hTypeFn)
-    Call LLVMSetFunctionCallConv(hFnSum, LLVMX86_StdCall)
+    Call LLVMSetFunctionCallConv(hFnSum, LLVMX86StdcallCallConv)
     hBlockEntry = LLVMAppendBasicBlock(hFnSum, "entry")
     hBuilder = LLVMCreateBuilder()
     Call LLVMPositionBuilderAtEnd(hBuilder, hBlockEntry)
