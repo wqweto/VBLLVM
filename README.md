@@ -11,8 +11,6 @@ LLVM sources are extracted in `lib/llvm-6.0.0.src` and `stdcall` patch is applie
 
 LLVM build uses [cmake](https://cmake.org/download/), [python3.x](https://www.python.org/downloads/) and Visual Studio 2015 so make sure you have these pre-installed.
 
-LLVM build uses [cmake](https://cmake.org/download/), [python3.x](https://www.python.org/downloads/) and Visual Studio 2015 so make sure you have these pre-installed.
-
 Use `lib/build-release/setup.bat` to compile LLVM release build in `lib/install-release`.
 
 Use `lib/build-debug/setup.bat` to compile LLVM debug build in `lib/install-debug`.
