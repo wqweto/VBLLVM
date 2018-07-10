@@ -108,175 +108,175 @@ void LLVM_STDCALL LLVMInitializeScalarOpts(LLVMPassRegistryRef R) {
   initializeScalarOpts(*unwrap(R));
 }
 
-void LLVMAddAggressiveDCEPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddAggressiveDCEPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createAggressiveDCEPass());
 }
 
-void LLVMAddBitTrackingDCEPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddBitTrackingDCEPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createBitTrackingDCEPass());
 }
 
-void LLVMAddAlignmentFromAssumptionsPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddAlignmentFromAssumptionsPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createAlignmentFromAssumptionsPass());
 }
 
-void LLVMAddCFGSimplificationPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddCFGSimplificationPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createCFGSimplificationPass(1, false, false, true));
 }
 
-void LLVMAddDeadStoreEliminationPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddDeadStoreEliminationPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createDeadStoreEliminationPass());
 }
 
-void LLVMAddScalarizerPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddScalarizerPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createScalarizerPass());
 }
 
-void LLVMAddGVNPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddGVNPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createGVNPass());
 }
 
-void LLVMAddNewGVNPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddNewGVNPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createNewGVNPass());
 }
 
-void LLVMAddMergedLoadStoreMotionPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddMergedLoadStoreMotionPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createMergedLoadStoreMotionPass());
 }
 
-void LLVMAddIndVarSimplifyPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddIndVarSimplifyPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createIndVarSimplifyPass());
 }
 
-void LLVMAddInstructionCombiningPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddInstructionCombiningPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createInstructionCombiningPass());
 }
 
-void LLVMAddJumpThreadingPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddJumpThreadingPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createJumpThreadingPass());
 }
 
-void LLVMAddLoopSinkPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLoopSinkPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoopSinkPass());
 }
 
-void LLVMAddLICMPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLICMPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLICMPass());
 }
 
-void LLVMAddLoopDeletionPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLoopDeletionPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoopDeletionPass());
 }
 
-void LLVMAddLoopIdiomPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLoopIdiomPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoopIdiomPass());
 }
 
-void LLVMAddLoopRotatePass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLoopRotatePass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoopRotatePass());
 }
 
-void LLVMAddLoopRerollPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLoopRerollPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoopRerollPass());
 }
 
-void LLVMAddLoopSimplifyCFGPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLoopSimplifyCFGPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoopSimplifyCFGPass());
 }
 
-void LLVMAddLoopUnrollPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLoopUnrollPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoopUnrollPass());
 }
 
-void LLVMAddLoopUnswitchPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLoopUnswitchPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLoopUnswitchPass());
 }
 
-void LLVMAddMemCpyOptPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddMemCpyOptPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createMemCpyOptPass());
 }
 
-void LLVMAddPartiallyInlineLibCallsPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddPartiallyInlineLibCallsPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createPartiallyInlineLibCallsPass());
 }
 
-void LLVMAddLowerSwitchPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLowerSwitchPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLowerSwitchPass());
 }
 
-void LLVMAddPromoteMemoryToRegisterPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddPromoteMemoryToRegisterPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createPromoteMemoryToRegisterPass());
 }
 
-void LLVMAddReassociatePass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddReassociatePass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createReassociatePass());
 }
 
-void LLVMAddSCCPPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddSCCPPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createSCCPPass());
 }
 
-void LLVMAddScalarReplAggregatesPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddScalarReplAggregatesPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createSROAPass());
 }
 
-void LLVMAddScalarReplAggregatesPassSSA(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddScalarReplAggregatesPassSSA(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createSROAPass());
 }
 
-void LLVMAddScalarReplAggregatesPassWithThreshold(LLVMPassManagerRef PM,
+void LLVM_STDCALL LLVMAddScalarReplAggregatesPassWithThreshold(LLVMPassManagerRef PM,
                                                   int Threshold) {
   unwrap(PM)->add(createSROAPass());
 }
 
-void LLVMAddSimplifyLibCallsPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddSimplifyLibCallsPass(LLVMPassManagerRef PM) {
   // NOTE: The simplify-libcalls pass has been removed.
 }
 
-void LLVMAddTailCallEliminationPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddTailCallEliminationPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createTailCallEliminationPass());
 }
 
-void LLVMAddConstantPropagationPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddConstantPropagationPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createConstantPropagationPass());
 }
 
-void LLVMAddDemoteMemoryToRegisterPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddDemoteMemoryToRegisterPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createDemoteRegisterToMemoryPass());
 }
 
-void LLVMAddVerifierPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddVerifierPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createVerifierPass());
 }
 
-void LLVMAddCorrelatedValuePropagationPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddCorrelatedValuePropagationPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createCorrelatedValuePropagationPass());
 }
 
-void LLVMAddEarlyCSEPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddEarlyCSEPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createEarlyCSEPass(false/*=UseMemorySSA*/));
 }
 
-void LLVMAddEarlyCSEMemSSAPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddEarlyCSEMemSSAPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createEarlyCSEPass(true/*=UseMemorySSA*/));
 }
 
-void LLVMAddGVNHoistLegacyPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddGVNHoistLegacyPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createGVNHoistPass());
 }
 
-void LLVMAddTypeBasedAliasAnalysisPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddTypeBasedAliasAnalysisPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createTypeBasedAAWrapperPass());
 }
 
-void LLVMAddScopedNoAliasAAPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddScopedNoAliasAAPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createScopedNoAliasAAWrapperPass());
 }
 
-void LLVMAddBasicAliasAnalysisPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddBasicAliasAnalysisPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createBasicAAWrapperPass());
 }
 
-void LLVMAddLowerExpectIntrinsicPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddLowerExpectIntrinsicPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createLowerExpectIntrinsicPass());
 }

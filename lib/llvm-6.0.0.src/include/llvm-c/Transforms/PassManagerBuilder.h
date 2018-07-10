@@ -30,51 +30,51 @@ extern "C" {
  */
 
 /** See llvm::PassManagerBuilder. */
-LLVMPassManagerBuilderRef LLVMPassManagerBuilderCreate(void);
-void LLVMPassManagerBuilderDispose(LLVMPassManagerBuilderRef PMB);
+LLVMPassManagerBuilderRef LLVM_STDCALL LLVMPassManagerBuilderCreate(void);
+void LLVM_STDCALL LLVMPassManagerBuilderDispose(LLVMPassManagerBuilderRef PMB);
 
 /** See llvm::PassManagerBuilder::OptLevel. */
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderSetOptLevel(LLVMPassManagerBuilderRef PMB,
                                   unsigned OptLevel);
 
 /** See llvm::PassManagerBuilder::SizeLevel. */
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderSetSizeLevel(LLVMPassManagerBuilderRef PMB,
                                    unsigned SizeLevel);
 
 /** See llvm::PassManagerBuilder::DisableUnitAtATime. */
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderSetDisableUnitAtATime(LLVMPassManagerBuilderRef PMB,
                                             LLVMBool Value);
 
 /** See llvm::PassManagerBuilder::DisableUnrollLoops. */
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderSetDisableUnrollLoops(LLVMPassManagerBuilderRef PMB,
                                             LLVMBool Value);
 
 /** See llvm::PassManagerBuilder::DisableSimplifyLibCalls */
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderSetDisableSimplifyLibCalls(LLVMPassManagerBuilderRef PMB,
                                                  LLVMBool Value);
 
 /** See llvm::PassManagerBuilder::Inliner. */
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderUseInlinerWithThreshold(LLVMPassManagerBuilderRef PMB,
                                               unsigned Threshold);
 
 /** See llvm::PassManagerBuilder::populateFunctionPassManager. */
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderPopulateFunctionPassManager(LLVMPassManagerBuilderRef PMB,
                                                   LLVMPassManagerRef PM);
 
 /** See llvm::PassManagerBuilder::populateModulePassManager. */
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderPopulateModulePassManager(LLVMPassManagerBuilderRef PMB,
                                                 LLVMPassManagerRef PM);
 
 /** See llvm::PassManagerBuilder::populateLTOPassManager. */
-void LLVMPassManagerBuilderPopulateLTOPassManager(LLVMPassManagerBuilderRef PMB,
+void LLVM_STDCALL LLVMPassManagerBuilderPopulateLTOPassManager(LLVMPassManagerBuilderRef PMB,
                                                   LLVMPassManagerRef PM,
                                                   LLVMBool Internalize,
                                                   LLVMBool RunInliner);

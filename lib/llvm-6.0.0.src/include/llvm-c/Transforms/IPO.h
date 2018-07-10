@@ -29,49 +29,49 @@ extern "C" {
  */
 
 /** See llvm::createArgumentPromotionPass function. */
-void LLVMAddArgumentPromotionPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddArgumentPromotionPass(LLVMPassManagerRef PM);
 
 /** See llvm::createConstantMergePass function. */
-void LLVMAddConstantMergePass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddConstantMergePass(LLVMPassManagerRef PM);
 
 /** See llvm::createCalledValuePropagationPass function. */
-void LLVMAddCalledValuePropagationPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddCalledValuePropagationPass(LLVMPassManagerRef PM);
 
 /** See llvm::createDeadArgEliminationPass function. */
-void LLVMAddDeadArgEliminationPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddDeadArgEliminationPass(LLVMPassManagerRef PM);
 
 /** See llvm::createFunctionAttrsPass function. */
-void LLVMAddFunctionAttrsPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddFunctionAttrsPass(LLVMPassManagerRef PM);
 
 /** See llvm::createFunctionInliningPass function. */
-void LLVMAddFunctionInliningPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddFunctionInliningPass(LLVMPassManagerRef PM);
 
 /** See llvm::createAlwaysInlinerPass function. */
-void LLVMAddAlwaysInlinerPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddAlwaysInlinerPass(LLVMPassManagerRef PM);
 
 /** See llvm::createGlobalDCEPass function. */
-void LLVMAddGlobalDCEPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddGlobalDCEPass(LLVMPassManagerRef PM);
 
 /** See llvm::createGlobalOptimizerPass function. */
-void LLVMAddGlobalOptimizerPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddGlobalOptimizerPass(LLVMPassManagerRef PM);
 
 /** See llvm::createIPConstantPropagationPass function. */
-void LLVMAddIPConstantPropagationPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddIPConstantPropagationPass(LLVMPassManagerRef PM);
 
 /** See llvm::createPruneEHPass function. */
-void LLVMAddPruneEHPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddPruneEHPass(LLVMPassManagerRef PM);
 
 /** See llvm::createIPSCCPPass function. */
-void LLVMAddIPSCCPPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddIPSCCPPass(LLVMPassManagerRef PM);
 
 /** See llvm::createInternalizePass function. */
-void LLVMAddInternalizePass(LLVMPassManagerRef, unsigned AllButMain);
+void LLVM_STDCALL LLVMAddInternalizePass(LLVMPassManagerRef, unsigned AllButMain);
 
 /** See llvm::createStripDeadPrototypesPass function. */
-void LLVMAddStripDeadPrototypesPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddStripDeadPrototypesPass(LLVMPassManagerRef PM);
 
 /** See llvm::createStripSymbolsPass function. */
-void LLVMAddStripSymbolsPass(LLVMPassManagerRef PM);
+void LLVM_STDCALL LLVMAddStripSymbolsPass(LLVMPassManagerRef PM);
 
 /**
  * @}

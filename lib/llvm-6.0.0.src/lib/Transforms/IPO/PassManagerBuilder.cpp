@@ -933,57 +933,57 @@ inline LLVMPassManagerBuilderRef wrap(PassManagerBuilder *P) {
   return reinterpret_cast<LLVMPassManagerBuilderRef>(P);
 }
 
-LLVMPassManagerBuilderRef LLVMPassManagerBuilderCreate() {
+LLVMPassManagerBuilderRef LLVM_STDCALL LLVMPassManagerBuilderCreate() {
   PassManagerBuilder *PMB = new PassManagerBuilder();
   return wrap(PMB);
 }
 
-void LLVMPassManagerBuilderDispose(LLVMPassManagerBuilderRef PMB) {
+void LLVM_STDCALL LLVMPassManagerBuilderDispose(LLVMPassManagerBuilderRef PMB) {
   PassManagerBuilder *Builder = unwrap(PMB);
   delete Builder;
 }
 
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderSetOptLevel(LLVMPassManagerBuilderRef PMB,
                                   unsigned OptLevel) {
   PassManagerBuilder *Builder = unwrap(PMB);
   Builder->OptLevel = OptLevel;
 }
 
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderSetSizeLevel(LLVMPassManagerBuilderRef PMB,
                                    unsigned SizeLevel) {
   PassManagerBuilder *Builder = unwrap(PMB);
   Builder->SizeLevel = SizeLevel;
 }
 
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderSetDisableUnitAtATime(LLVMPassManagerBuilderRef PMB,
                                             LLVMBool Value) {
   // NOTE: The DisableUnitAtATime switch has been removed.
 }
 
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderSetDisableUnrollLoops(LLVMPassManagerBuilderRef PMB,
                                             LLVMBool Value) {
   PassManagerBuilder *Builder = unwrap(PMB);
   Builder->DisableUnrollLoops = Value;
 }
 
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderSetDisableSimplifyLibCalls(LLVMPassManagerBuilderRef PMB,
                                                  LLVMBool Value) {
   // NOTE: The simplify-libcalls pass has been removed.
 }
 
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderUseInlinerWithThreshold(LLVMPassManagerBuilderRef PMB,
                                               unsigned Threshold) {
   PassManagerBuilder *Builder = unwrap(PMB);
   Builder->Inliner = createFunctionInliningPass(Threshold);
 }
 
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderPopulateFunctionPassManager(LLVMPassManagerBuilderRef PMB,
                                                   LLVMPassManagerRef PM) {
   PassManagerBuilder *Builder = unwrap(PMB);
@@ -991,7 +991,7 @@ LLVMPassManagerBuilderPopulateFunctionPassManager(LLVMPassManagerBuilderRef PMB,
   Builder->populateFunctionPassManager(*FPM);
 }
 
-void
+void LLVM_STDCALL
 LLVMPassManagerBuilderPopulateModulePassManager(LLVMPassManagerBuilderRef PMB,
                                                 LLVMPassManagerRef PM) {
   PassManagerBuilder *Builder = unwrap(PMB);
@@ -999,7 +999,7 @@ LLVMPassManagerBuilderPopulateModulePassManager(LLVMPassManagerBuilderRef PMB,
   Builder->populateModulePassManager(*MPM);
 }
 
-void LLVMPassManagerBuilderPopulateLTOPassManager(LLVMPassManagerBuilderRef PMB,
+void LLVM_STDCALL LLVMPassManagerBuilderPopulateLTOPassManager(LLVMPassManagerBuilderRef PMB,
                                                   LLVMPassManagerRef PM,
                                                   LLVMBool Internalize,
                                                   LLVMBool RunInliner) {

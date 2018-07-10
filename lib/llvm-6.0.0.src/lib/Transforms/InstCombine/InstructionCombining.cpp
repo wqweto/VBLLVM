@@ -3341,7 +3341,7 @@ void llvm::initializeInstCombine(PassRegistry &Registry) {
   initializeInstructionCombiningPassPass(Registry);
 }
 
-void LLVMInitializeInstCombine(LLVMPassRegistryRef R) {
+extern "C" void LLVM_STDCALL LLVMInitializeInstCombine(LLVMPassRegistryRef R) {
   initializeInstructionCombiningPassPass(*unwrap(R));
 }
 

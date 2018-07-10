@@ -64,65 +64,65 @@ void LLVM_STDCALL LLVMInitializeIPO(LLVMPassRegistryRef R) {
   initializeIPO(*unwrap(R));
 }
 
-void LLVMAddArgumentPromotionPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddArgumentPromotionPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createArgumentPromotionPass());
 }
 
-void LLVMAddCalledValuePropagationPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddCalledValuePropagationPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createCalledValuePropagationPass());
 }
 
-void LLVMAddConstantMergePass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddConstantMergePass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createConstantMergePass());
 }
 
-void LLVMAddDeadArgEliminationPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddDeadArgEliminationPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createDeadArgEliminationPass());
 }
 
-void LLVMAddFunctionAttrsPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddFunctionAttrsPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createPostOrderFunctionAttrsLegacyPass());
 }
 
-void LLVMAddFunctionInliningPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddFunctionInliningPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createFunctionInliningPass());
 }
 
-void LLVMAddAlwaysInlinerPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddAlwaysInlinerPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(llvm::createAlwaysInlinerLegacyPass());
 }
 
-void LLVMAddGlobalDCEPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddGlobalDCEPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createGlobalDCEPass());
 }
 
-void LLVMAddGlobalOptimizerPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddGlobalOptimizerPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createGlobalOptimizerPass());
 }
 
-void LLVMAddIPConstantPropagationPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddIPConstantPropagationPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createIPConstantPropagationPass());
 }
 
-void LLVMAddPruneEHPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddPruneEHPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createPruneEHPass());
 }
 
-void LLVMAddIPSCCPPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddIPSCCPPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createIPSCCPPass());
 }
 
-void LLVMAddInternalizePass(LLVMPassManagerRef PM, unsigned AllButMain) {
+void LLVM_STDCALL LLVMAddInternalizePass(LLVMPassManagerRef PM, unsigned AllButMain) {
   auto PreserveMain = [=](const GlobalValue &GV) {
     return AllButMain && GV.getName() == "main";
   };
   unwrap(PM)->add(createInternalizePass(PreserveMain));
 }
 
-void LLVMAddStripDeadPrototypesPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddStripDeadPrototypesPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createStripDeadPrototypesPass());
 }
 
-void LLVMAddStripSymbolsPass(LLVMPassManagerRef PM) {
+void LLVM_STDCALL LLVMAddStripSymbolsPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createStripSymbolsPass());
 }
