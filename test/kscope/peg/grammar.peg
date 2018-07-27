@@ -1,0 +1,294 @@
+/*
+'=========================================================================
+'
+' kscope (c) 2018 by wqweto@gmail.com
+'
+' Kaleidoscope toy language for VBLLVM
+'
+' grammar.peg - Kaleidoscope PEG
+'
+'=========================================================================
+*/
+@private true
+
+start
+    = f:-                                                               {   JsonItem(oJson, -1) = Empty
+                                                                            Set $f = oJson }
+          (n:stmt                                                       {   Set oJson = $f
+                                                                            JsonItem(oJson, -1) = $n }
+                 )+                                                     {   Set $$ = $f }
+
+stmt
+    = definition SEMI?
+    | extern SEMI?
+    | expr SEMI?
+    | SEMI
+
+definition
+    = K_DEF ns p:prototype e:expr                                       {   JsonItem(oJson, "Tag") = "Def"
+                                                                            JsonItem(oJson, "Proto") = $p
+                                                                            JsonItem(oJson, "Body") = $e
+                                                                            Set $$ = oJson }
+
+extern
+    = K_EXTERN ns p:prototype                                           {   JsonItem(oJson, "Tag") = "Extern"
+                                                                            JsonItem(oJson, "Proto") = $p
+                                                                            Set $$ = oJson }
+
+prototype
+    = binopproto
+    | K_UNARY ns op:UNOP LPAREN p:param_list RPAREN                     {   JsonItem(oJson, "Tag") = "Prototype"
+                                                                            JsonItem(oJson, "Name") = "unary" + $n
+                                                                            JsonItem(oJson, "Oper") = $n
+                                                                            JsonItem(oJson, "Params") = $p
+                                                                            Set $$ = oJson }
+    | !KEYWORD n:IDENT LPAREN p:param_list RPAREN                       {   JsonItem(oJson, "Tag") = "Prototype"
+                                                                            JsonItem(oJson, "Name") = $n
+                                                                            JsonItem(oJson, "Params") = $p
+                                                                            Set $$ = oJson }
+
+binopproto
+    =                                                                  &{   Dim sBinOp          As String
+                                                                            Dim lOpPrec         As Long
+                                                                            Dim lOpAssoc        As Long }
+      K_BINARY ns n:BINOP                                              &{   '-- collect local binop info for use on success
+                                                                            sBinOp = $$text }
+                          pr:NUMBER                                    &{   lOpPrec = C_Lng($$text)
+                                                                            lOpAssoc = 1 }
+                                    LPAREN p:param_list RPAREN         &{   '--- on match immediately update parser binop info
+                                                                            SetBinopInfo sBinOp, lOpPrec, lOpAssoc }
+                                                                        {   JsonItem(oJson, "Tag") = "Prototype"
+                                                                            JsonItem(oJson, "Name") = "binary" + $n
+                                                                            JsonItem(oJson, "Oper") = $n
+                                                                            JsonItem(oJson, "Precedence") = $pr
+                                                                            JsonItem(oJson, "Params") = $p
+                                                                            Set $$ = oJson }
+
+expr
+    =                                                                  &{   '--- clear min precedence
+                                                                            m_lBinopMinPrec = 0 }
+      binexpr
+
+binexpr
+    =                                                                  &{   Dim lMinPrec        As Long
+                                                                            Dim vOpInfo         As Variant
+                                                                            lMinPrec = m_lBinopMinPrec }
+      l:unexpr (op:BINOP                                               &{   '--- get current binop prec & assoc
+                                                                            vOpInfo = GetBinopInfo($$text) }
+                                                                       &{   vOpInfo(0) >= lMinPrec }
+                                                                       &{   '--- set next min precedence based on binop prec & assoc
+                                                                            m_lBinopMinPrec = vOpInfo(0) + vOpInfo(1) }
+                         r:binexpr                                      {   JsonItem(oJson, "Tag") = "BinExpr"
+                                                                            JsonItem(oJson, "Left") = $l
+                                                                            JsonItem(oJson, "Oper") = $op
+                                                                            JsonItem(oJson, "Right") = $r
+                                                                            JsonItem(oJson, "BinopInfo") = GetBinopInfo(C_Str($op))
+                                                                            Set $l = oJson }
+                                  )*                                    {   AssignVariant $$, $l }
+
+unexpr
+    = op:UNOP e:unexpr                                                  {   JsonItem(oJson, "Tag") = "UnExpr"
+                                                                            JsonItem(oJson, "Oper") = $op
+                                                                            JsonItem(oJson, "Expr") = $e
+                                                                            Set $$ = oJson }
+    | primary
+
+primary
+    = DOUBLE
+    | LPAREN expr RPAREN
+    | invokeexpr
+    | ifexpr
+    | forexpr
+    | varexpr
+    | IDENT
+
+invokeexpr
+    = n:IDENT LPAREN a:arg_list RPAREN                                  {   JsonItem(oJson, "Tag") = "InvokeExpr"
+                                                                            JsonItem(oJson, "Func") = $n
+                                                                            JsonItem(oJson, "Args") = $a
+                                                                            Set $$ = oJson }
+
+ifexpr
+    = K_IF ns c:expr K_THEN ns t:expr (K_ELSE ns e:expr)?               {   JsonItem(oJson, "Tag") = "IfExpr"
+                                                                            JsonItem(oJson, "Cond") = $c
+                                                                            JsonItem(oJson, "Then") = $t
+                                                                            JsonItem(oJson, "Else") = $e
+                                                                            Set $$ = oJson }
+
+forexpr
+    = K_FOR ns n:IDENT EQ i:expr COMMA l:expr (COMMA s:expr)?
+      K_IN ns e:expr                                                    {   JsonItem(oJson, "Tag") = "ForExpr"
+                                                                            JsonItem(oJson, "Var") = $n
+                                                                            JsonItem(oJson, "Init") = $i
+                                                                            JsonItem(oJson, "Last") = $l
+                                                                            JsonItem(oJson, "Step") = $s
+                                                                            JsonItem(oJson, "Body") = $e
+                                                                            Set $$ = oJson }
+
+varexpr
+    = K_VAR ns v:var_list K_IN ns e:expr                                {   JsonItem(oJson, "Tag") = "VarExpr"
+                                                                            JsonItem(oJson, "Vars") = $v
+                                                                            JsonItem(oJson, "Body") = $e
+                                                                            Set $$ = oJson }
+
+param_list
+    = f:IDENT                                                           {   JsonItem(oJson, -1) = $f
+                                                                            Set $f = oJson }
+              (COMMA? n:IDENT                                           {   Set oJson = $f
+                                                                            JsonItem(oJson, -1) = $n }
+                             )*                                         {   Set $$ = $f }
+
+arg_list
+    = f:expr                                                            {   JsonItem(oJson, -1) = $f
+                                                                            Set $f = oJson }
+             (COMMA? n:expr                                             {   Set oJson = $f
+                                                                            JsonItem(oJson, -1) = $n }
+                            )*                                          {   Set $$ = $f }
+
+var_list
+    = f:var_decl                                                        {   JsonItem(oJson, -1) = $f
+                                                                            Set $f = oJson }
+                 (COMMA? n:var_decl                                     {   Set oJson = $f
+                                                                            JsonItem(oJson, -1) = $n }
+                                    )*                                  {   Set $$ = $f }
+
+var_decl
+    = n:IDENT (EQ e:expr | e:EMPTY)                                     {   JsonItem(oJson, "Tag") = "VarDecl"
+                                                                            JsonItem(oJson, "Name") = $n
+                                                                            JsonItem(oJson, "Expr") = $e }
+
+KEYWORD
+    = ( K_DEF
+      | K_EXTERN
+      | K_IF
+      | K_THEN
+      | K_ELSE
+      | K_UNARY
+      | K_FOR
+      | K_BINARY
+      | K_IN
+      | K_VAR
+      ) !ALPHANUM
+
+
+# Lexical rules
+
+LPAREN      = '(' -
+RPAREN      = ')' -
+COMMA       = ',' -
+EQ          = '=' -
+SEMI        = ';' -
+IDENT       = < [a-zA-Z_] ALPHANUM* > -                                 { $$ = $$text }
+BINOP       = < [-+*/<>=:|&] [=]? > -                                   { $$ = $$text }
+UNOP        = < [-+!~] >                                                { $$ = $$text }
+NUMBER      = < [0-9]+ > -                                              { $$ = C_Lng($$text) }
+DOUBLE      = < ([0-9]+ '.'? [0-9]* | [0-9]* '.' [0-9]+) > -            { $$ = C_Dbl($$text) }
+K_DEF       = 'def'
+K_EXTERN    = 'extern'
+K_IF        = 'if'
+K_THEN      = 'then'
+K_ELSE      = 'else'
+K_BINARY    = 'binary'
+K_UNARY     = 'unary'
+K_FOR       = 'for'
+K_IN        = 'in'
+K_VAR       = 'var'
+ALPHANUM    = [a-zA-Z_0-9]
+EMPTY       = < '' >
+
+# Whitespace
+
+-           = (LineComment | [ \t\r\n])*
+ns          = !ALPHANUM -
+LineComment = '#' [^\r\n]*
+
+@declares {
+Private m_oBinopInfo        As Scripting.Dictionary
+Private m_lBinopMinPrec     As Long
+Private m_sFileName         As String
+Private m_laOffsets()       As Long
+}
+
+@prolog {
+    Dim oJson As Object
+
+    With ctx
+}
+
+@epilog {
+    End With
+}
+
+@{
+Public Function GetBinopInfo(sOp As String) As Variant
+    If m_oBinopInfo Is Nothing Then
+        Set m_oBinopInfo = New Scripting.Dictionary
+        m_oBinopInfo.Item("<") = Array(10, 1)
+        m_oBinopInfo.Item("+") = Array(20, 1)
+        m_oBinopInfo.Item("-") = Array(20, 1)
+        m_oBinopInfo.Item("*") = Array(40, 1)
+'        m_oBinopInfo.Item("/") = Array(40, 1)
+'        m_oBinopInfo.Item("^") = Array(50, 0)
+    End If
+    If m_oBinopInfo.Exists(sOp) Then
+        GetBinopInfo = m_oBinopInfo.Item(sOp)
+    Else
+        GetBinopInfo = Array(0, 0)
+    End If
+End Function
+
+Public Function SetBinopInfo(sOp As String, ByVal lPrec As Long,  ByVal lAssoc As Long) As Variant
+    If m_oBinopInfo Is Nothing Then
+        GetBinopInfo vbNullString
+    End If
+    m_oBinopInfo.Item(sOp) = Array(lPrec, lAssoc, "Override")
+End Function
+
+Public Function MatchFile(sFile As String) As Scripting.Dictionary
+    Dim sContents       As String
+    Dim vResult         As Variant
+    
+    sContents = ReadTextFile(sFile)
+    m_sFileName = Mid$(sFile, InStrRev(sFile, "\") + 1)
+    m_laOffsets = pvBuildLineInfo(sContents)
+    If Match(sContents, Result:=vResult) > 0 Then
+        Set MatchFile = vResult
+    End If
+End Function
+
+Private Function pvBuildLineInfo(sSubject As String) As Long()
+    Dim lIdx            As Long
+    Dim laRetVal()      As Long
+    
+    With CreateObject("VBScript.RegExp")
+        .Global = True
+        .Pattern = "\r?\n"
+        With .Execute(sSubject)
+            ReDim laRetVal(0 To .Count) As Long
+            For lIdx = 0 To .Count - 1
+                With .Item(lIdx)
+                    laRetVal(lIdx + 1) = .FirstIndex + .Length
+                End With
+            Next
+        End With
+    End With
+    pvBuildLineInfo = laRetVal
+End Function
+
+Public Function CalcLine(ByVal lOffset As Long) As Variant
+    Dim lLower          As Long
+    Dim lUpper          As Long
+    Dim lMiddle         As Long
+    
+    lUpper = UBound(m_laOffsets)
+    Do While lLower < lUpper
+        lMiddle = (lLower + lUpper + 1) \ 2
+        If m_laOffsets(lMiddle) < lOffset Then
+            lLower = lMiddle
+        Else
+            lUpper = lMiddle - 1
+        End If
+    Loop
+    CalcLine = Array(m_sFileName, lUpper + 1, lOffset - m_laOffsets(lUpper))
+End Function
+}
