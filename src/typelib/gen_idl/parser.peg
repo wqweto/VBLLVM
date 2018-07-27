@@ -4,14 +4,14 @@
 # Parses typdefs, enums, structs and function declarations
 #
 
-Stmt            = ret:-                                                 {   JsonItem(oJson, -1) = Empty
+Stmt            = ret:''                                                {   JsonItem(oJson, -1) = Empty
                                                                             Set $ret = oJson }
                   (
-                      (n:TypedefDecl | n:TypedefCallback
-                      | n:EnumDecl | n:StructDecl | n:FunDecl
-                      | n:SkipStmt)                                     {   Set oJson = $ret : JsonItem(oJson, -1) = $n }
+                      n:(TypedefDecl | TypedefCallback
+                        | EnumDecl | StructDecl | FunDecl
+                        | SkipStmt)                                     {   Set oJson = $ret : JsonItem(oJson, -1) = $n }
                   )*
-                  EOL                                                   {   Dim oJson As Object, oEl As Object : Set $$ = $ret }
+                  EOL                                                   {   Set $$ = $ret }
     
 TypedefDecl     = TYPEDEF t:Type n:ID SEMI                              {   JsonItem(oJson, "Tag") = "TypedefDecl"
                                                                             JsonItem(oJson, "Name") = $n
@@ -24,34 +24,32 @@ TypedefCallback = TYPEDEF t:TypeUnlimited
                                                                             JsonItem(oJson, "Type") = $t
                                                                             JsonItem(oJson, "Params") = $p
                                                                             Set $$ = oJson }
-EnumDecl        = ret:-                                                 {   JsonItem(oJson, "Tag") = "EnumDecl" 
+EnumDecl        = TYPEDEF? ENUM n:ID? LBRACE ret:''                     {   JsonItem(oJson, "Tag") = "EnumDecl" 
                                                                             JsonItem(oJson, "Items/-1") = Empty
                                                                             Set $ret = oJson }
-                  TYPEDEF? ENUM (n:ID | n:EMPTY) LBRACE
                   (
-                      e:ID ((EQ v:EnumValue) | v:EMPTY) COMMA?          {   JsonItem(oEl, "Name") = $e
+                      e:ID (v:EnumValue | v:EMPTY) COMMA?               {   JsonItem(oEl, "Name") = $e
                                                                             JsonItem(oEl, "Value") = zn(CStr($v), Empty)
                                                                             Set oJson = $ret
                                                                             JsonItem(oJson, "Items/-1") = oEl }
                   )+
-                  RBRACE n:ID? SEMI                                     {   Set oJson = $ret
+                  RBRACE (n:ID)? SEMI                                   {   Set oJson = $ret
                                                                             JsonItem(oJson, "Name") = $n
                                                                             Set $$ = oJson }
-StructDecl      = ret:-                                                 {   JsonItem(oJson, "Tag") = "StructDecl" 
+StructDecl      = TYPEDEF? STRUCT n:ID? LBRACE ret:''                   {   JsonItem(oJson, "Tag") = "StructDecl" 
                                                                             JsonItem(oJson, "Items/-1") = Empty
                                                                             Set $ret = oJson }
-                  TYPEDEF? STRUCT (n:ID | n:EMPTY) LBRACE
                   (
                       t:Type e:ID SEMI                                  {   JsonItem(oEl, "Name") = $e
                                                                             JsonItem(oEl, "Type") = $t
                                                                             Set oJson = $ret
                                                                             JsonItem(oJson, "Items/-1") = oEl }
                   )+
-                  RBRACE n:ID? SEMI                                     {   Set oJson = $ret
+                  RBRACE (n:ID)? SEMI                                   {   Set oJson = $ret
                                                                             JsonItem(oJson, "Name") = $n
                                                                             Set $$ = oJson }
 FunDecl         = Linkage? t:Type LLVM_STDCALL n:ID 
-                  LPAREN p:Params? RPAREN (SEMI | LBRACE)               {   JsonItem(oJson, "Tag") = "FunDecl"
+                  LPAREN (p:Params)? RPAREN (SEMI | LBRACE)             {   JsonItem(oJson, "Tag") = "FunDecl"
                                                                             JsonItem(oJson, "Name") = $n
                                                                             JsonItem(oJson, "Type") = $t
                                                                             JsonItem(oJson, "Params") = $p
@@ -78,11 +76,11 @@ Params          = ret:Param                                             {   Json
                   (
                     COMMA n:Param                                       {   Set oJson = $ret : JsonItem(oJson, -1) = $n }
                   )*                                                    {   Set $$ = $ret }
-Param           = t:Type (n:ID | n:EMPTY) (a:ArraySuffix | a:EMPTY)     {   JsonItem(oJson, "Type") = $t
+Param           = t:Type n:ID? a:ArraySuffix?                           {   JsonItem(oJson, "Type") = $t
                                                                             JsonItem(oJson, "Name") = $n
                                                                             JsonItem(oJson, "ArraySuffix") = zn(CStr($a), Empty)
                                                                             Set $$ = oJson }
-EnumValue       = ret:-                                                 {   Set $ret = New Collection }
+EnumValue       = EQ ret:''                                             {   Set $ret = New Collection }
                   e:EnumValueToken                                      {   $ret.Add $e }
                   (e:EnumValueToken                                     {   $ret.Add $e }
                   )*                                                    {   Set oJson = $ret : $$ = ConcatCollection(oJson, " ") }
@@ -95,7 +93,7 @@ Linkage         = (EXTERN | STATIC) INLINE?
 ID              = < SYM SD* > -                                         {   $$ = $$text }
 SYM             = [a-zA-Z_]
 SD              = [a-zA-Z_0-9#]
-TYPEDEF         = 'typedef' !SD -
+TYPEDEF         = 'typedef'i !SD -
 INT             = 'int' !SD -
 CHAR            = 'char' !SD -
 UNSIGNED        = 'unsigned' !SD -
@@ -137,3 +135,15 @@ LINECOMMENT     = '//' [^\r\n]* NL
 
 EMPTY           = < '' >                                                {   $$ = $$text }
 EOL             = !.
+
+@prolog {
+    Dim oJson As Object
+    Dim oEl As Object
+    
+    With ctx
+}
+
+@epilog {
+    End With
+}
+
