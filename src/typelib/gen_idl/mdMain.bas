@@ -190,7 +190,9 @@ Private Sub pvIncludeFile(uState As UcsStateType, oInclude As Object)
         Case "StructDecl"
             uState.Typedefs.Add oItem, JsonItem(oItem, "Name")
         Case "EnumDecl"
-            uState.Typedefs.Add oItem, JsonItem(oItem, "Name")
+            If Not IsEmpty(JsonItem(oItem, "Name")) Then
+                uState.Typedefs.Add oItem, JsonItem(oItem, "Name")
+            End If
         Case "FunDecl"
             If Not SearchCollection(uState.Funcs, JsonItem(oItem, "Name")) Then
                 uState.Funcs.Add oItem, JsonItem(oItem, "Name")
