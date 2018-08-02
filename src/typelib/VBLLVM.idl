@@ -592,7 +592,7 @@ library VBLLVM
                         [in] LPSTR Message);
         [entry("LLVMDisposeMessage")]
                 void LLVMDisposeMessage(
-                        [in] LPSTR Message);
+                        [in] LONG Message);
         [entry("LLVMContextCreate")]
                 LLVMContextRef LLVMContextCreate();
         [entry("LLVMGetGlobalContext")]
@@ -3242,7 +3242,7 @@ library VBLLVM
                         [in] LPSTR Symbol);
         [entry("LLVMOrcDisposeMangledSymbol")]
                 void LLVMOrcDisposeMangledSymbol(
-                        [in] LPSTR MangledSymbol);
+                        [in] LONG MangledSymbol);
         [entry("LLVMOrcCreateLazyCompileCallback")]
                 LLVMOrcErrorCode LLVMOrcCreateLazyCompileCallback(
                         [in] LLVMOrcJITStackRef JITStack,

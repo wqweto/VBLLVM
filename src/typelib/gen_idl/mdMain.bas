@@ -242,7 +242,7 @@ Private Sub pvOutputFunc(uState As UcsStateType, oItem As Object)
         lIdx = 1
         For Each vKey In JsonKeys(oItem, "Params")
             Set oParam = JsonItem(oItem, "Params/" & vKey)
-            sType = pvToIdlType(uState, JsonItem(oParam, "Type"), sDirection)
+            sType = pvToIdlType(uState, JsonItem(oParam, "Type"), sDirection, ReturnType:=InStr(sName, "Dispose") > 0)
             sText = sText & Space$(IDENT + 16) & "[" & sDirection & "] " & sType & _
                 " " & Zn(JsonItem(oParam, "Name"), "p" & lIdx) & IIf(lIdx < lCount, "," & vbCrLf, vbNullString)
             lIdx = lIdx + 1
