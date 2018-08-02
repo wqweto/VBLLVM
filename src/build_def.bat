@@ -1,4 +1,8 @@
-call C:\Work\Temp\VBLLVM\lib\install-release\lib\dump-def.bat > VBLLVM.def
+@echo off
+setlocal
+set prj_root=%~dp0..
+
+call %prj_root%\lib\install-release\lib\dump-def.bat > VBLLVM.def
 echo   LLVMInitializeAllTargetInfos=_VBLLVMInitializeAllTargetInfos@0 >> VBLLVM.def
 echo   LLVMInitializeAllTargets=_VBLLVMInitializeAllTargets@0 >> VBLLVM.def
 echo   LLVMInitializeAllTargetMCs=_VBLLVMInitializeAllTargetMCs@0 >> VBLLVM.def
