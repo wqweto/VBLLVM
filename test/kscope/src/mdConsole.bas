@@ -1,6 +1,7 @@
 Attribute VB_Name = "mdConsole"
 '=========================================================================
 '
+' VBLLVM Project
 ' kscope (c) 2018 by wqweto@gmail.com
 '
 ' Kaleidoscope toy language for VBLLVM

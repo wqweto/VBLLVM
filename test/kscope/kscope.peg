@@ -1,11 +1,12 @@
 /*
 '=========================================================================
 '
+' VBLLVM Project
 ' kscope (c) 2018 by wqweto@gmail.com
 '
 ' Kaleidoscope toy language for VBLLVM
 '
-' grammar.peg - Kaleidoscope PEG
+' grammar.peg - Kaleidoscope PEG grammar
 '
 '=========================================================================
 */
@@ -37,12 +38,12 @@ extern
 
 prototype
     = binopproto
-    | K_UNARY ns op:UNOP LPAREN p:param_list RPAREN                     {   JsonItem(oJson, "Tag") = "Prototype"
+    | K_UNARY ns op:UNOP LPAREN p:param_list? RPAREN                    {   JsonItem(oJson, "Tag") = "Prototype"
                                                                             JsonItem(oJson, "Name") = "unary" + $n
                                                                             JsonItem(oJson, "Oper") = $n
                                                                             JsonItem(oJson, "Params") = $p
                                                                             Set $$ = oJson }
-    | !KEYWORD n:IDENT LPAREN p:param_list RPAREN                       {   JsonItem(oJson, "Tag") = "Prototype"
+    | !KEYWORD n:IDENT LPAREN p:param_list? RPAREN                      {   JsonItem(oJson, "Tag") = "Prototype"
                                                                             JsonItem(oJson, "Name") = $n
                                                                             JsonItem(oJson, "Params") = $p
                                                                             Set $$ = oJson }
@@ -55,7 +56,7 @@ binopproto
                                                                             sBinOp = $$text }
                           pr:NUMBER                                    &{   lOpPrec = C_Lng($$text)
                                                                             lOpAssoc = 1 }
-                                    LPAREN p:param_list RPAREN         &{   '--- on match immediately update parser binop info
+                                    LPAREN p:param_list? RPAREN        &{   '--- on match immediately update parser binop info
                                                                             SetBinopInfo sBinOp, lOpPrec, lOpAssoc }
                                                                         {   JsonItem(oJson, "Tag") = "Prototype"
                                                                             JsonItem(oJson, "Name") = "binary" + $n
@@ -96,20 +97,20 @@ unexpr
 primary
     = DOUBLE
     | LPAREN expr RPAREN
-    | invokeexpr
+    | callexpr
     | ifexpr
     | forexpr
     | varexpr
     | IDENT
 
-invokeexpr
-    = n:IDENT LPAREN a:arg_list RPAREN                                  {   JsonItem(oJson, "Tag") = "InvokeExpr"
-                                                                            JsonItem(oJson, "Func") = $n
+callexpr
+    = n:IDENT LPAREN a:arg_list? RPAREN                                 {   JsonItem(oJson, "Tag") = "CallExpr"
+                                                                            JsonItem(oJson, "Name") = $n
                                                                             JsonItem(oJson, "Args") = $a
                                                                             Set $$ = oJson }
 
 ifexpr
-    = K_IF ns c:expr K_THEN ns t:expr (K_ELSE ns e:expr)?               {   JsonItem(oJson, "Tag") = "IfExpr"
+    = K_IF ns c:expr K_THEN ns t:expr K_ELSE ns e:expr                  {   JsonItem(oJson, "Tag") = "IfExpr"
                                                                             JsonItem(oJson, "Cond") = $c
                                                                             JsonItem(oJson, "Then") = $t
                                                                             JsonItem(oJson, "Else") = $e
@@ -120,7 +121,7 @@ forexpr
       K_IN ns e:expr                                                    {   JsonItem(oJson, "Tag") = "ForExpr"
                                                                             JsonItem(oJson, "Var") = $n
                                                                             JsonItem(oJson, "Init") = $i
-                                                                            JsonItem(oJson, "Last") = $l
+                                                                            JsonItem(oJson, "End") = $l
                                                                             JsonItem(oJson, "Step") = $s
                                                                             JsonItem(oJson, "Body") = $e
                                                                             Set $$ = oJson }
@@ -227,7 +228,7 @@ Public Function GetBinopInfo(sOp As String) As Variant
         m_oBinopInfo.Item("+") = Array(20, 1)
         m_oBinopInfo.Item("-") = Array(20, 1)
         m_oBinopInfo.Item("*") = Array(40, 1)
-'        m_oBinopInfo.Item("/") = Array(40, 1)
+        m_oBinopInfo.Item("/") = Array(40, 1)
 '        m_oBinopInfo.Item("^") = Array(50, 0)
     End If
     If m_oBinopInfo.Exists(sOp) Then

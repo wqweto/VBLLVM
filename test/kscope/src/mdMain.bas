@@ -1,6 +1,7 @@
 Attribute VB_Name = "mdMain"
 '=========================================================================
 '
+' VBLLVM Project
 ' kscope (c) 2018 by wqweto@gmail.com
 '
 ' Kaleidoscope toy language for VBLLVM
@@ -21,6 +22,8 @@ DefObj A-Z
 Private Const GENERIC_WRITE                 As Long = &H40000000
 Private Const OPEN_EXISTING                 As Long = 3
 Private Const FILE_SHARE_READ               As Long = &H1
+'--- for VirtualAlloc
+Private Const PAGE_EXECUTE_READWRITE        As Long = &H40
 
 Private Declare Function CommandLineToArgvW Lib "shell32" (ByVal lpCmdLine As Long, pNumArgs As Long) As Long
 Private Declare Function LocalFree Lib "kernel32" (ByVal hMem As Long) As Long
@@ -34,6 +37,8 @@ Private Declare Function SetFilePointer Lib "kernel32" (ByVal hFile As Long, ByV
 Private Declare Function SetEndOfFile Lib "kernel32" (ByVal hFile As Long) As Long
 Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
 Private Declare Sub ExitProcess Lib "kernel32" (ByVal uExitCode As Long)
+Private Declare Function lstrlen Lib "kernel32" Alias "lstrlenA" (ByVal lpString As Long) As Long
+Private Declare Function VirtualProtect Lib "kernel32" (ByVal lpAddress As Long, ByVal dwSize As Long, ByVal flNewProtect As Long, ByRef lpflOldProtect As Long) As Long
 
 '=========================================================================
 ' Constants and member variables
@@ -51,7 +56,8 @@ Private m_oOpt                  As Scripting.Dictionary
 Private Sub Main()
     Dim lExitCode       As Long
     
-    lExitCode = Process(SplitArgs(Command$))
+    pvInitLLVM
+    lExitCode = Process(SplitArgs(Trim$(Command$)))
     If Not InIde Then
         Call ExitProcess(lExitCode)
     End If
@@ -62,7 +68,11 @@ Private Function Process(vArgs As Variant) As Long
     Dim nFile           As Integer
     Dim sOutput         As String
     Dim lIdx            As Long
-    Dim oTree           As Scripting.Dictionary
+    Dim oTree           As Object
+    Dim oCodegen        As cCodegen
+    Dim oJIT            As cJIT
+    Dim vNode           As Variant
+    Dim dblResult       As Double
     
     On Error GoTo EH
     Set m_oParser = New cParser
@@ -88,18 +98,63 @@ Private Function Process(vArgs As Variant) As Long
         If m_oOpt.Item("numarg") = 0 Then
             Process = 100
         End If
-        Exit Function
+        GoTo QH
     End If
     sOutFile = m_oOpt.Item("-o")
+    If Not m_oOpt.Item("-emit-tree") And Not m_oOpt.Item("-emit-ir") And LenB(sOutFile) = 0 Then
+        Set oJIT = New cJIT
+    End If
     For lIdx = 1 To m_oOpt.Item("numarg")
         Set oTree = m_oParser.MatchFile(m_oOpt.Item("arg" & lIdx))
         If LenB(m_oParser.LastError) <> 0 Then
             ConsoleError "%2: %3: %1" & vbCrLf, m_oParser.LastError, Join(m_oParser.CalcLine(m_oParser.LastOffset + 1), ":"), IIf(oTree Is Nothing, "error", "warning")
+            GoTo QH
+        End If
+        If m_oOpt.Item("-emit-tree") Then
+            sOutput = sOutput & JsonDump(oTree) & vbCrLf
+        ElseIf Not oTree Is Nothing Then
+            For Each vNode In oTree.Items
+                If oCodegen Is Nothing Then
+                    Set oCodegen = New cCodegen
+                    If Not oCodegen.Init(oTree, GetFilePart(m_oOpt.Item("arg" & lIdx))) Then
+                        Err.Raise vbObjectError, , "Cannot init codegen: " & oCodegen.LastError
+                    End If
+                End If
+                If Not oCodegen.CodeGenTop(vNode) Then
+                    ConsoleError "%2: %3: %1" & vbCrLf, oCodegen.LastError, Join(m_oParser.CalcLine(JsonItem(C_Obj(vNode), "Offset")), ":"), "codegen"
+                    GoTo QH
+                End If
+                If Not oJIT Is Nothing Then
+                    If oCodegen.GetFunction("__anon_expr") <> 0 Then
+                        If Not oJIT.AddModule(oCodegen) Then
+                            ConsoleError "%2: %3: %1" & vbCrLf, oJIT.LastError, Join(m_oParser.CalcLine(JsonItem(C_Obj(vNode), "Offset")), ":"), "JIT error"
+                            GoTo QH
+                        End If
+                        If oJIT.Invoke("__anon_expr", dblResult) Then
+                            ConsolePrint "Evaluated to %1" & vbCrLf, dblResult
+                        End If
+                        oJIT.RemoveModule oCodegen
+                        Set oCodegen = Nothing
+                    End If
+                End If
+            Next
+        End If
+        If Not oCodegen Is Nothing Then
+            If m_oOpt.Item("-emit-ir") Then
+                sOutput = sOutput & oCodegen.GetIR() & vbCrLf
+            Else
+                If Not oCodegen.EmitToFile(sOutFile) Then
+                    ConsoleError "%2: %3: %1" & vbCrLf, oCodegen.LastError, Join(m_oParser.CalcLine(1), ":"), "emit"
+                    GoTo QH
+                End If
+                If Not m_oOpt.Item("-q") Then
+                    ConsoleError "File " & sOutFile & " emitted successfully" & vbCrLf
+                End If
+            End If
         End If
     Next
-    If m_oOpt.Item("-emit-tree") Then
-        sOutput = JsonDump(oTree)
-    Else
+    If LenB(sOutput) = 0 Then
+        GoTo QH
     End If
     '--- write output
     If InIde Then
@@ -118,6 +173,7 @@ Private Function Process(vArgs As Variant) As Long
     Else
         ConsolePrint sOutput
     End If
+QH:
     Exit Function
 EH:
     ConsoleError "Critical error: " & Err.Description & vbCrLf
@@ -371,6 +427,14 @@ Public Function C_Dbl(Value As Variant) As Double
 QH:
 End Function
 
+Public Function C_Obj(Value As Variant) As Object
+    On Error GoTo QH
+    If IsObject(Value) Then
+        Set C_Obj = Value
+    End If
+QH:
+End Function
+
 Public Function CanonicalPath(sPath As String) As String
     With CreateObject("Scripting.FileSystemObject")
         CanonicalPath = .GetAbsolutePathName(sPath)
@@ -444,3 +508,44 @@ Public Sub AssignVariant(vDest As Variant, vSrc As Variant)
     End If
 End Sub
 
+Public Function ToString(ByVal lPtr As Long) As String
+    If lPtr <> 0 Then
+        ToString = String(lstrlen(lPtr), Chr(0))
+        Call CopyMemory(ByVal ToString, ByVal lPtr, lstrlen(lPtr))
+    End If
+End Function
+
+Public Function CallNoParam(ByVal pfn As Long) As Double
+    '--- on first call will self-patch
+    RtccPatchProto AddressOf mdMain.CallNoParam
+    CallNoParam = CallNoParam(pfn)
+End Function
+
+Public Sub RtccPatchProto(ByVal pfn As Long) '--- Helper by The trick
+    If InIde Then
+        Call CopyMemory(pfn, ByVal UnsignedAdd(pfn, &H16), 4)
+    Else
+        Call VirtualProtect(pfn, 8, PAGE_EXECUTE_READWRITE, 0)
+    End If
+    ' 0:  58                      pop    eax
+    ' 1:  59                      pop    ecx
+    ' 2:  50                      push   eax
+    ' 3:  ff e1                   jmp    ecx
+    ' 5:  90                      nop
+    ' 6:  90                      nop
+    ' 7:  90                      nop
+    Call CopyMemory(ByVal pfn, -802975883527609.7192@, 8)
+End Sub
+
+Private Function UnsignedAdd(ByVal lUnsignedPtr As Long, ByVal lSignedOffset As Long) As Long
+    '--- note: safely add *signed* offset to *unsigned* ptr for *unsigned* retval w/o overflow in LARGEADDRESSAWARE processes
+    UnsignedAdd = ((lUnsignedPtr Xor &H80000000) + lSignedOffset) Xor &H80000000
+End Function
+
+Private Sub pvInitLLVM()
+    Call LLVMInitializeAllTargetInfos
+    Call LLVMInitializeAllTargets
+    Call LLVMInitializeAllTargetMCs
+    Call LLVMInitializeAllAsmPrinters
+    Call LLVMInitializeAllAsmParsers
+End Sub
