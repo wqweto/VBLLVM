@@ -38,8 +38,8 @@ extern
 
 prototype
     = binopproto
-    | K_UNARY ns op:UNOP LPAREN p:param_list? RPAREN                    {   JsonItem(oJson, "Tag") = "Prototype"
-                                                                            JsonItem(oJson, "Name") = "unary" + $n
+    | K_UNARY ns n:UNOP LPAREN p:param_list? RPAREN                    {   JsonItem(oJson, "Tag") = "Prototype"
+                                                                            JsonItem(oJson, "Name") = "unary" & $n
                                                                             JsonItem(oJson, "Oper") = $n
                                                                             JsonItem(oJson, "Params") = $p
                                                                             Set $$ = oJson }
@@ -59,7 +59,7 @@ binopproto
                                     LPAREN p:param_list? RPAREN        &{   '--- on match immediately update parser binop info
                                                                             SetBinopInfo sBinOp, lOpPrec, lOpAssoc }
                                                                         {   JsonItem(oJson, "Tag") = "Prototype"
-                                                                            JsonItem(oJson, "Name") = "binary" + $n
+                                                                            JsonItem(oJson, "Name") = "binary" & $n
                                                                             JsonItem(oJson, "Oper") = $n
                                                                             JsonItem(oJson, "Precedence") = $pr
                                                                             JsonItem(oJson, "Params") = $p
