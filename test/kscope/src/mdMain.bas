@@ -548,4 +548,12 @@ Private Sub pvInitLLVM()
     Call LLVMInitializeAllTargetMCs
     Call LLVMInitializeAllAsmPrinters
     Call LLVMInitializeAllAsmParsers
+    Call LLVMAddSymbol("_putchard@8", AddressOf runtime_putchard)
 End Sub
+
+Private Function runtime_putchard(ByVal dblValue As Double) As Double
+    If dblValue = 10 Then
+        ConsolePrint vbCr
+    End If
+    ConsolePrint ChrW(dblValue)
+End Function

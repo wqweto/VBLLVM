@@ -1,3 +1,5 @@
+extern putchard(x);
+
 # Logical unary not.
 def unary!(v)
   if v then

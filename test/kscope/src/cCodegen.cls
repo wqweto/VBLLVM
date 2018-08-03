@@ -91,6 +91,7 @@ Public Function CodeGenNode(vNode As Variant, hResult As LLVMValueRef) As Boolea
             m_sLastError = "Undefined '" & vNode & "'"
             GoTo QH
         End If
+        hResult = LLVMBuildLoad(m_hBuilder, hResult, C_Str(vNode))
     Case vbObject
         Set oNode = C_Obj(vNode)
         On Error GoTo EH
@@ -114,23 +115,37 @@ End Function
 
 Public Function VisitDef(oNode As Scripting.Dictionary, hResult As LLVMValueRef) As Boolean
     Dim oScope          As Scripting.Dictionary
+    Dim hFunc           As LLVMValueRef
     Dim hBlock          As LLVMBasicBlockRef
     Dim hBody           As LLVMValueRef
-
-    Set oScope = New Scripting.Dictionary
-    pvScopePush oScope
+    Dim hParam          As LLVMValueRef
+    Dim hAlloca         As LLVMValueRef
+    Dim sName           As String
+    Dim lIdx            As Long
+    
     If Not CodeGenNode(JsonItem(oNode, "Proto"), hResult) Then
         GoTo QH
     End If
-    hBlock = LLVMAppendBasicBlock(hResult, "entry")
+    hFunc = hResult
+    hBlock = LLVMAppendBasicBlock(hFunc, "entry")
     Call LLVMPositionBuilderAtEnd(m_hBuilder, hBlock)
+    Set oScope = New Scripting.Dictionary
+    pvScopePush oScope
+    For lIdx = 0 To LLVMCountParams(hFunc) - 1
+        hParam = LLVMGetParam(hFunc, lIdx)
+        Debug.Assert hParam <> 0
+        sName = ToString(LLVMGetValueName(hParam))
+        hAlloca = pvCreateEntryBlockAlloca(hFunc, sName)
+        LLVMBuildStore m_hBuilder, hParam, hAlloca
+        m_oLocalScope.Item(sName) = hAlloca
+    Next
     If Not CodeGenNode(JsonItem(oNode, "Body"), hBody) Then
-        Call LLVMDeleteFunction(hResult)
+        Call LLVMDeleteFunction(hFunc)
         GoTo QH
     End If
     Call LLVMBuildRet(m_hBuilder, hBody)
-    If LLVMVerifyFunction(hResult, LLVMPrintMessageAction) = 1 Then
-        Call LLVMDeleteFunction(hResult)
+    If LLVMVerifyFunction(hFunc, LLVMPrintMessageAction) = 1 Then
+        Call LLVMDeleteFunction(hFunc)
         GoTo QH
     End If
     '--- success
@@ -141,24 +156,38 @@ QH:
     End If
 End Function
 
+Public Function VisitExtern(oNode As Scripting.Dictionary, hResult As LLVMValueRef) As Boolean
+    If Not CodeGenNode(JsonItem(oNode, "Proto"), hResult) Then
+        GoTo QH
+    End If
+    Call LLVMSetLinkage(hResult, LLVMExternalLinkage)
+    Call LLVMSetFunctionCallConv(hResult, LLVMX86StdcallCallConv)
+    '--- success
+    VisitExtern = True
+QH:
+End Function
+
 Public Function VisitPrototype(oNode As Scripting.Dictionary, hResult As LLVMValueRef) As Boolean
+    Dim sName           As String
     Dim lCount          As Long
     Dim aParams()       As LLVMTypeRef
     Dim lIdx            As Long
     Dim hType           As LLVMTypeRef
     Dim hParam          As LLVMValueRef
+    Dim hAlloca         As LLVMValueRef
     
+    sName = JsonItem(oNode, "Name")
     If IsObject(JsonItem(oNode, "Params")) Then
         lCount = UBound(JsonKeys(oNode, "Params")) + 1
     End If
-    hResult = LLVMGetNamedFunction(m_hModule, JsonItem(oNode, "Name"))
+    hResult = LLVMGetNamedFunction(m_hModule, sName)
     If hResult <> 0 Then
         If LLVMCountParams(hResult) <> lCount Then
-            m_sLastError = JsonItem(oNode, "Name") & " declared with different param count"
+            m_sLastError = sName & " declared with different param count"
             GoTo QH
         End If
         If LLVMCountBasicBlocks(hResult) <> 0 Then
-            m_sLastError = JsonItem(oNode, "Name") & " already defined"
+            m_sLastError = sName & " already defined"
             GoTo QH
         End If
     Else
@@ -168,14 +197,13 @@ Public Function VisitPrototype(oNode As Scripting.Dictionary, hResult As LLVMVal
         Next
         hType = LLVMFunctionType(LLVMDoubleType(), aParams(0), lCount, 0)
         Debug.Assert hType <> 0
-        hResult = LLVMAddFunction(m_hModule, JsonItem(oNode, "Name"), hType)
-        m_oModuleScope.Item(JsonItem(oNode, "Name")) = hResult
+        hResult = LLVMAddFunction(m_hModule, sName, hType)
+        m_oModuleScope.Item(sName) = hResult
     End If
     For lIdx = 0 To lCount - 1
         hParam = LLVMGetParam(hResult, lIdx)
         Debug.Assert hParam <> 0
         Call LLVMSetValueName(hParam, JsonItem(oNode, "Params/" & lIdx))
-        m_oLocalScope.Item(JsonItem(oNode, "Params/" & lIdx)) = hParam
     Next
     '--- success
     VisitPrototype = True
@@ -221,7 +249,7 @@ Public Function VisitBinExpr(oNode As Scripting.Dictionary, hResult As LLVMValue
 QH:
 End Function
 
-Public Function VisitUnExp(oNode As Scripting.Dictionary, hResult As LLVMValueRef) As Boolean
+Public Function VisitUnExpr(oNode As Scripting.Dictionary, hResult As LLVMValueRef) As Boolean
     Dim aArgs()         As LLVMValueRef
     
     hResult = GetFunction("unary" & JsonItem(oNode, "Oper"))
@@ -235,25 +263,27 @@ Public Function VisitUnExp(oNode As Scripting.Dictionary, hResult As LLVMValueRe
     End If
     hResult = LLVMBuildCall(m_hBuilder, hResult, aArgs(0), 1, "calltmp")
     '--- success
-    VisitUnExp = True
+    VisitUnExpr = True
 QH:
 End Function
 
 Public Function VisitCallExpr(oNode As Scripting.Dictionary, hResult As LLVMValueRef) As Boolean
+    Dim sName           As String
     Dim lCount          As Long
     Dim lIdx            As Long
     Dim aArgs()         As LLVMValueRef
     
-    hResult = GetFunction(JsonItem(oNode, "Name"))
+    sName = JsonItem(oNode, "Name")
+    hResult = GetFunction(sName)
     If hResult = 0 Then
-        m_sLastError = "Function '" & JsonItem(oNode, "Name") & "' not defined"
+        m_sLastError = "Function '" & sName & "' not defined"
         GoTo QH
     End If
     If IsObject(JsonItem(oNode, "Args")) Then
         lCount = UBound(JsonKeys(oNode, "Args")) + 1
     End If
     If LLVMCountParams(hResult) <> lCount Then
-        m_sLastError = "Wrong number of arguments to '" & JsonItem(oNode, "Name") & "' function"
+        m_sLastError = "Wrong number of arguments to '" & sName & "' function"
         GoTo QH
     End If
     ReDim aArgs(0 To LLVMCountParams(hResult)) As LLVMValueRef
@@ -434,8 +464,10 @@ QH:
 End Function
 
 Public Function GetFunction(sName As String) As LLVMValueRef
-    'GetFunction = LLVMGetNamedFunction(m_hModule, sName)
     GetFunction = pvScopeResolve(m_oModuleScope, sName)
+    If GetFunction = 0 Then
+        GetFunction = LLVMGetNamedFunction(m_hModule, sName)
+    End If
 End Function
 
 Public Function GetIR() As String
