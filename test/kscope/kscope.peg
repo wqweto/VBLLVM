@@ -224,6 +224,7 @@ Private m_laOffsets()       As Long
 Public Function GetBinopInfo(sOp As String) As Variant
     If m_oBinopInfo Is Nothing Then
         Set m_oBinopInfo = New Scripting.Dictionary
+        m_oBinopInfo.Item("=") = Array(2, 1)
         m_oBinopInfo.Item("<") = Array(10, 1)
         m_oBinopInfo.Item("+") = Array(20, 1)
         m_oBinopInfo.Item("-") = Array(20, 1)

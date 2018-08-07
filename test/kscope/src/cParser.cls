@@ -11,7 +11,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
-' Auto-generated on 2.8.2018 12:58:31
+' Auto-generated on 7.8.2018 12:25:28
 Option Explicit
 DefObj A-Z
 
@@ -115,7 +115,7 @@ Property Get LastOffset() As Long
 End Property
 
 Property Get ParserVersion() As String
-    ParserVersion = "2.8.2018 12:58:31"
+    ParserVersion = "7.8.2018 12:25:28"
 End Property
 
 Property Get Contents(Optional ByVal lOffset As Long = 1, Optional ByVal lSize As Long = LNG_MAXINT) As String
@@ -1552,6 +1552,7 @@ End Sub
 Public Function GetBinopInfo(sOp As String) As Variant
     If m_oBinopInfo Is Nothing Then
         Set m_oBinopInfo = New Scripting.Dictionary
+        m_oBinopInfo.Item("=") = Array(2, 1)
         m_oBinopInfo.Item("<") = Array(10, 1)
         m_oBinopInfo.Item("+") = Array(20, 1)
         m_oBinopInfo.Item("-") = Array(20, 1)
