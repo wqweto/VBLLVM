@@ -24,11 +24,19 @@ Attribute VB_Exposed = False
 Option Explicit
 DefObj A-Z
 
+'=========================================================================
+' Constants and member variables
+'=========================================================================
+
+Private Const ERR_NO_METHOD     As Long = 438  ' Object doesn't support this property or method
+
 Private m_sLastError        As String
 Private m_oTree             As Object
+Private m_oMachine          As cTargetMachine
 Private m_sModuleName       As String
 Private m_hModule           As LLVMModuleRef
 Private m_hBuilder          As LLVMBuilderRef
+Private m_hFuncPassManager  As LLVMPassManagerRef
 Private m_oModuleScope      As Scripting.Dictionary
 Private m_oLocalScope       As Scripting.Dictionary
 
@@ -44,22 +52,45 @@ End Property
 ' Methods
 '=========================================================================
 
-Public Function Init(oTree As Object, sModuleName As String) As Boolean
+Public Function Init(oTree As Object, oMachine As cTargetMachine, sModuleName As String) As Boolean
+    '--- init member vars
     Set m_oTree = oTree
+    Set m_oMachine = oMachine
     m_sModuleName = sModuleName
-    Set m_oModuleScope = New Scripting.Dictionary
-    Set m_oLocalScope = m_oLocalScope
-    m_hModule = LLVMModuleCreateWithName(m_sModuleName)
+    '--- setup LLVM module
+    m_hModule = LLVMModuleCreateWithName("module-" & m_sModuleName)
     If m_hModule = 0 Then
         GoTo QH
     End If
+    Call LLVMSetTarget(m_hModule, m_oMachine.Triple)
+    Call LLVMSetModuleDataLayout(m_hModule, LLVMCreateTargetDataLayout(m_oMachine.GetMachine()))
     m_hBuilder = LLVMCreateBuilder()
     If m_hBuilder = 0 Then
         GoTo QH
     End If
+    '--- setup current scope
+    Set m_oModuleScope = New Scripting.Dictionary
+    Set m_oLocalScope = m_oLocalScope
     '--- success
     Init = True
 QH:
+End Function
+
+Public Function SetOptimize(ByVal lLevel As Long) As Boolean
+    If lLevel = 0 Then
+        If m_hFuncPassManager <> 0 Then
+            Call LLVMDisposePassManager(m_hFuncPassManager)
+            m_hFuncPassManager = 0
+        End If
+    Else
+        m_hFuncPassManager = LLVMCreateFunctionPassManagerForModule(m_hModule)
+        Call LLVMInitializeFunctionPassManager(m_hFuncPassManager)
+        Call LLVMAddConstantPropagationPass(m_hFuncPassManager)
+        Call LLVMAddReassociatePass(m_hFuncPassManager)
+        Call LLVMAddCFGSimplificationPass(m_hFuncPassManager)
+    End If
+    '--- success
+    SetOptimize = True
 End Function
 
 Public Function CodeGenTop(vNode As Variant) As Boolean
@@ -94,7 +125,7 @@ Public Function CodeGenNode(vNode As Variant, hResult As LLVMValueRef) As Boolea
         hResult = LLVMBuildLoad(m_hBuilder, hResult, C_Str(vNode))
     Case vbObject
         Set oNode = C_Obj(vNode)
-        On Error GoTo EH
+        On Error GoTo EH_NoMethod
         If Not CallByName(Me, "Visit" & JsonItem(oNode, "Tag"), VbMethod, oNode, hResult) Then
             GoTo QH
         End If
@@ -106,12 +137,65 @@ Public Function CodeGenNode(vNode As Variant, hResult As LLVMValueRef) As Boolea
     CodeGenNode = True
 QH:
     Exit Function
-EH:
-    If Err.Number = 438 Then ' Object doesn't support this property or method
+EH_NoMethod:
+    If Err.Number = ERR_NO_METHOD Then
         Err.Raise vbObjectError, , "Unknown node type: " & JsonItem(oNode, "Tag")
     End If
     Err.Raise Err.Number, Err.Source, Err.Description
 End Function
+
+Public Function GetModule() As LLVMModuleRef
+    Dim lMsgPtr         As Long
+    
+    If LLVMVerifyModule(m_hModule, LLVMAbortProcessAction, lMsgPtr) <> 0 Then
+        m_sLastError = ToString(lMsgPtr)
+        Call LLVMDisposeMessage(lMsgPtr)
+        GoTo QH
+    End If
+    GetModule = m_hModule
+QH:
+End Function
+
+Public Function GetFunction(sName As String) As LLVMValueRef
+    GetFunction = pvScopeResolve(m_oModuleScope, sName)
+    If GetFunction = 0 Then
+        GetFunction = LLVMGetNamedFunction(m_hModule, sName)
+    End If
+End Function
+
+Public Function GetString() As String
+    Dim lMsgPtr         As Long
+    
+    If LLVMVerifyModule(m_hModule, LLVMAbortProcessAction, lMsgPtr) <> 0 Then
+        m_sLastError = ToString(lMsgPtr)
+        Call LLVMDisposeMessage(lMsgPtr)
+        GoTo QH
+    End If
+    lMsgPtr = LLVMPrintModuleToString(m_hModule)
+    If lMsgPtr <> 0 Then
+        GetString = ToString(lMsgPtr)
+        Call LLVMDisposeMessage(lMsgPtr)
+    End If
+QH:
+End Function
+
+Public Function EmitToFile(ByVal sFile As String) As Boolean
+    Dim lMsgPtr         As Long
+    
+    If LenB(sFile) = 0 Then
+        sFile = m_sModuleName & ".o"
+    End If
+    If LLVMTargetMachineEmitToFile(m_oMachine.GetMachine(), m_hModule, sFile, LLVMObjectFile, lMsgPtr) <> 0 Then
+        m_sLastError = ToString(lMsgPtr)
+        Call LLVMDisposeMessage(lMsgPtr)
+        GoTo QH
+    End If
+    '--- success
+    EmitToFile = True
+QH:
+End Function
+
+'= visitor impl ==========================================================
 
 Public Function VisitDef(oNode As Scripting.Dictionary, hResult As LLVMValueRef) As Boolean
     Dim oScope          As Scripting.Dictionary
@@ -136,7 +220,7 @@ Public Function VisitDef(oNode As Scripting.Dictionary, hResult As LLVMValueRef)
         Debug.Assert hParam <> 0
         sName = ToString(LLVMGetValueName(hParam))
         hAlloca = pvCreateEntryBlockAlloca(hFunc, sName)
-        LLVMBuildStore m_hBuilder, hParam, hAlloca
+        Call LLVMBuildStore(m_hBuilder, hParam, hAlloca)
         m_oLocalScope.Item(sName) = hAlloca
     Next
     If Not CodeGenNode(JsonItem(oNode, "Body"), hBody) Then
@@ -147,6 +231,12 @@ Public Function VisitDef(oNode As Scripting.Dictionary, hResult As LLVMValueRef)
     If LLVMVerifyFunction(hFunc, LLVMPrintMessageAction) = 1 Then
         Call LLVMDeleteFunction(hFunc)
         GoTo QH
+    End If
+    If m_hFuncPassManager <> 0 Then
+        If LLVMRunFunctionPassManager(m_hFuncPassManager, hFunc) = 1 Then
+            Call LLVMDeleteFunction(hFunc)
+            GoTo QH
+        End If
     End If
     '--- success
     VisitDef = True
@@ -161,7 +251,14 @@ Public Function VisitExtern(oNode As Scripting.Dictionary, hResult As LLVMValueR
         GoTo QH
     End If
     Call LLVMSetLinkage(hResult, LLVMExternalLinkage)
-    Call LLVMSetFunctionCallConv(hResult, LLVMX86StdcallCallConv)
+'    pvAddLLVMAttrStr hResult, "less-precise-fpmad", "false"
+'    pvAddLLVMAttrStr hResult, "no-frame-pointer-elim", "true"
+'    pvAddLLVMAttrStr hResult, "no-frame-pointer-elim-non-leaf", vbNullString
+'    pvAddLLVMAttrStr hResult, "no-infs-fp-math", "false"
+'    pvAddLLVMAttrStr hResult, "no-nans-fp-math", "false"
+'    pvAddLLVMAttrStr hResult, "stack-protector-buffer-size", "8"
+'    pvAddLLVMAttrStr hResult, "unsafe-fp-math", "false"
+'    pvAddLLVMAttrStr hResult, "use-soft-float", "false"
     '--- success
     VisitExtern = True
 QH:
@@ -174,7 +271,6 @@ Public Function VisitPrototype(oNode As Scripting.Dictionary, hResult As LLVMVal
     Dim lIdx            As Long
     Dim hType           As LLVMTypeRef
     Dim hParam          As LLVMValueRef
-    Dim hAlloca         As LLVMValueRef
     
     sName = JsonItem(oNode, "Name")
     If IsObject(JsonItem(oNode, "Params")) Then
@@ -211,49 +307,68 @@ QH:
 End Function
 
 Public Function VisitBinExpr(oNode As Scripting.Dictionary, hResult As LLVMValueRef) As Boolean
+    Dim hAlloca         As LLVMValueRef
     Dim hLeft           As LLVMValueRef
     Dim hRight          As LLVMValueRef
+    Dim hFunc           As LLVMValueRef
     Dim aArgs()         As LLVMValueRef
     
-    If Not CodeGenNode(JsonItem(oNode, "Left"), hLeft) Then
-        GoTo QH
-    End If
-    If Not CodeGenNode(JsonItem(oNode, "Right"), hRight) Then
-        GoTo QH
-    End If
-    Select Case JsonItem(oNode, "Oper")
-    Case "+"
-        hResult = LLVMBuildFAdd(m_hBuilder, hLeft, hRight, "addtmp")
-    Case "-"
-        hResult = LLVMBuildFSub(m_hBuilder, hLeft, hRight, "subtmp")
-    Case "*"
-        hResult = LLVMBuildFMul(m_hBuilder, hLeft, hRight, "multmp")
-    Case "/"
-        hResult = LLVMBuildFDiv(m_hBuilder, hLeft, hRight, "divtmp")
-    Case "<"
-        hResult = LLVMBuildFCmp(m_hBuilder, LLVMRealULT, hLeft, hRight, "cmptmp")
-        hResult = LLVMBuildCast(m_hBuilder, LLVMUIToFP, hResult, LLVMDoubleType(), "booltmp")
-    Case Else
-        hResult = GetFunction("binary" & JsonItem(oNode, "Oper"))
-        If hResult = 0 Then
-            m_sLastError = "Unknown binop '" & JsonItem(oNode, "Oper") & "'"
+    If JsonItem(oNode, "Oper") = "=" Then
+        If VarType(JsonItem(oNode, "Left")) <> vbString Then
+            m_sLastError = "Destination of '=' must be a variable"
             GoTo QH
         End If
-        ReDim aArgs(0 To 1) As LLVMValueRef
-        aArgs(0) = hLeft
-        aArgs(1) = hRight
-        hResult = LLVMBuildCall(m_hBuilder, hResult, aArgs(0), 2, "calltmp")
-    End Select
+        hAlloca = pvScopeResolve(m_oLocalScope, JsonItem(oNode, "Left"))
+        If hAlloca = 0 Then
+            m_sLastError = "Unknown variable '" & JsonItem(oNode, "Left") & "'"
+            GoTo QH
+        End If
+        If Not CodeGenNode(JsonItem(oNode, "Right"), hRight) Then
+            GoTo QH
+        End If
+        Call LLVMBuildStore(m_hBuilder, hRight, hAlloca)
+    Else
+        If Not CodeGenNode(JsonItem(oNode, "Left"), hLeft) Then
+            GoTo QH
+        End If
+        If Not CodeGenNode(JsonItem(oNode, "Right"), hRight) Then
+            GoTo QH
+        End If
+        Select Case JsonItem(oNode, "Oper")
+        Case "+"
+            hResult = LLVMBuildFAdd(m_hBuilder, hLeft, hRight, "addtmp")
+        Case "-"
+            hResult = LLVMBuildFSub(m_hBuilder, hLeft, hRight, "subtmp")
+        Case "*"
+            hResult = LLVMBuildFMul(m_hBuilder, hLeft, hRight, "multmp")
+        Case "/"
+            hResult = LLVMBuildFDiv(m_hBuilder, hLeft, hRight, "divtmp")
+        Case "<"
+            hResult = LLVMBuildFCmp(m_hBuilder, LLVMRealULT, hLeft, hRight, "cmptmp")
+            hResult = LLVMBuildCast(m_hBuilder, LLVMUIToFP, hResult, LLVMDoubleType(), "booltmp")
+        Case Else
+            hFunc = GetFunction("binary" & JsonItem(oNode, "Oper"))
+            If hFunc = 0 Then
+                m_sLastError = "Unknown binop '" & JsonItem(oNode, "Oper") & "'"
+                GoTo QH
+            End If
+            ReDim aArgs(0 To 1) As LLVMValueRef
+            aArgs(0) = hLeft
+            aArgs(1) = hRight
+            hResult = LLVMBuildCall(m_hBuilder, hFunc, aArgs(0), 2, "binop")
+        End Select
+    End If
     '--- success
     VisitBinExpr = True
 QH:
 End Function
 
 Public Function VisitUnExpr(oNode As Scripting.Dictionary, hResult As LLVMValueRef) As Boolean
+    Dim hFunc           As LLVMValueRef
     Dim aArgs()         As LLVMValueRef
     
-    hResult = GetFunction("unary" & JsonItem(oNode, "Oper"))
-    If hResult = 0 Then
+    hFunc = GetFunction("unary" & JsonItem(oNode, "Oper"))
+    If hFunc = 0 Then
         m_sLastError = "Unknown unary '" & JsonItem(oNode, "Oper") & "'"
         GoTo QH
     End If
@@ -261,7 +376,7 @@ Public Function VisitUnExpr(oNode As Scripting.Dictionary, hResult As LLVMValueR
     If Not CodeGenNode(JsonItem(oNode, "Expr"), aArgs(0)) Then
         GoTo QH
     End If
-    hResult = LLVMBuildCall(m_hBuilder, hResult, aArgs(0), 1, "calltmp")
+    hResult = LLVMBuildCall(m_hBuilder, hFunc, aArgs(0), 1, "unop")
     '--- success
     VisitUnExpr = True
 QH:
@@ -269,30 +384,31 @@ End Function
 
 Public Function VisitCallExpr(oNode As Scripting.Dictionary, hResult As LLVMValueRef) As Boolean
     Dim sName           As String
+    Dim hFunc           As LLVMValueRef
     Dim lCount          As Long
     Dim lIdx            As Long
     Dim aArgs()         As LLVMValueRef
     
     sName = JsonItem(oNode, "Name")
-    hResult = GetFunction(sName)
-    If hResult = 0 Then
+    hFunc = GetFunction(sName)
+    If hFunc = 0 Then
         m_sLastError = "Function '" & sName & "' not defined"
         GoTo QH
     End If
     If IsObject(JsonItem(oNode, "Args")) Then
         lCount = UBound(JsonKeys(oNode, "Args")) + 1
     End If
-    If LLVMCountParams(hResult) <> lCount Then
+    If LLVMCountParams(hFunc) <> lCount Then
         m_sLastError = "Wrong number of arguments to '" & sName & "' function"
         GoTo QH
     End If
-    ReDim aArgs(0 To LLVMCountParams(hResult)) As LLVMValueRef
+    ReDim aArgs(0 To LLVMCountParams(hFunc)) As LLVMValueRef
     For lIdx = 0 To lCount - 1
         If Not CodeGenNode(JsonItem(oNode, "Args/" & lIdx), aArgs(lIdx)) Then
             GoTo QH
         End If
     Next
-    hResult = LLVMBuildCall(m_hBuilder, hResult, aArgs(0), UBound(aArgs), "calltmp")
+    hResult = LLVMBuildCall(m_hBuilder, hFunc, aArgs(0), lCount, "calltmp")
     '--- success
     VisitCallExpr = True
 QH:
@@ -375,10 +491,10 @@ Public Function VisitForExpr(oNode As Scripting.Dictionary, hResult As LLVMValue
     If Not CodeGenNode(JsonItem(oNode, "End"), hEnd) Then
         GoTo QH
     End If
-    hEnd = LLVMBuildFCmp(m_hBuilder, LLVMRealONE, hEnd, LLVMConstReal(LLVMDoubleType(), 0), "loopcond")
     hCurVar = LLVMBuildLoad(m_hBuilder, hAlloca, JsonItem(oNode, "Var"))
     hNextVar = LLVMBuildFAdd(m_hBuilder, hCurVar, hStepVal, "nextvar")
     Call LLVMBuildStore(m_hBuilder, hNextVar, hAlloca)
+    hEnd = LLVMBuildFCmp(m_hBuilder, LLVMRealONE, hEnd, LLVMConstReal(LLVMDoubleType(), 0), "loopcond")
     hBlockAfter = LLVMAppendBasicBlock(hFunc, "afterloop")
     Call LLVMBuildCondBr(m_hBuilder, hEnd, hBlockLoop, hBlockAfter)
     Call LLVMPositionBuilderAtEnd(m_hBuilder, hBlockAfter)
@@ -422,6 +538,8 @@ QH:
     End If
 End Function
 
+'= private ===============================================================
+
 Private Function pvCreateEntryBlockAlloca(ByVal hFunc As LLVMValueRef, sName As String) As LLVMValueRef
     Dim hBuilder        As LLVMBuilderRef
     Dim hBlock          As LLVMBasicBlockRef
@@ -451,73 +569,35 @@ Private Function pvScopeResolve(ByVal oScope As Scripting.Dictionary, sName As S
     Loop
 End Function
 
-Public Function GetModule() As LLVMModuleRef
-    Dim lMsgPtr         As Long
-    
-    If LLVMVerifyModule(m_hModule, LLVMAbortProcessAction, lMsgPtr) <> 0 Then
-        m_sLastError = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
-        GoTo QH
-    End If
-    GetModule = m_hModule
-QH:
-End Function
+'Private Sub pvAddLLVMAttrStr(ByVal hFunc As LLVMValueRef, sName As String, sValue As String)
+'    Dim hAttr           As LLVMAttributeRef
+'
+'    hAttr = LLVMCreateStringAttribute(LLVMGetGlobalContext(), sName, Len(sName), sValue, Len(sValue))
+'    If hAttr <> 0 Then
+'        Call LLVMAddAttributeAtIndex(hFunc, -1, hAttr)
+'    End If
+'End Sub
 
-Public Function GetFunction(sName As String) As LLVMValueRef
-    GetFunction = pvScopeResolve(m_oModuleScope, sName)
-    If GetFunction = 0 Then
-        GetFunction = LLVMGetNamedFunction(m_hModule, sName)
-    End If
-End Function
-
-Public Function GetIR() As String
-    Dim lMsgPtr         As Long
-    
-    If LLVMVerifyModule(m_hModule, LLVMAbortProcessAction, lMsgPtr) <> 0 Then
-        m_sLastError = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
-        GoTo QH
-    End If
-    lMsgPtr = LLVMPrintModuleToString(m_hModule)
-    If lMsgPtr <> 0 Then
-        GetIR = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
-    End If
-QH:
-End Function
-
-Public Function EmitToFile(ByVal sFile As String) As Boolean
-    Dim hTarget         As Long
-    Dim sTriple         As String
-    Dim lMsgPtr         As Long
-    Dim hMachine        As Long
-    
-    If LenB(sFile) = 0 Then
-        sFile = m_sModuleName & ".o"
-    End If
-    sTriple = ToString(LLVMGetDefaultTargetTriple())
-    If LLVMGetTargetFromTriple(sTriple, hTarget, lMsgPtr) <> 0 Then
-        m_sLastError = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
-        GoTo QH
-    End If
-    hMachine = LLVMCreateTargetMachine(hTarget, sTriple, vbNullString, vbNullString, _
-            LLVMCodeGenLevelAggressive, LLVMRelocDefault, LLVMCodeModelSmall)
-    If LLVMTargetMachineEmitToFile(hMachine, m_hModule, sFile, LLVMObjectFile, lMsgPtr) <> 0 Then
-        m_sLastError = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
-        GoTo QH
-    End If
-    '--- success
-    EmitToFile = True
-QH:
-End Function
+'Private Sub pvAddLLVMAttrInt(ByVal hFunc As LLVMValueRef, sName As String, Optional ByVal lValue As Long)
+'    Dim lKind           As Long
+'    Dim hAttr           As LLVMAttributeRef
+'
+'    lKind = LLVMGetEnumAttributeKindForName(sName, Len(sName))
+'    Debug.Assert lKind <> 0
+'    hAttr = LLVMCreateEnumAttribute(LLVMGetGlobalContext(), lKind, lValue * 10000)
+'    If hAttr <> 0 Then
+'        Call LLVMAddAttributeAtIndex(hFunc, -1, hAttr)
+'    End If
+'End Sub
 
 '=========================================================================
 ' Base class events
 '=========================================================================
 
 Private Sub Class_Terminate()
+    If m_hFuncPassManager <> 0 Then
+        Call LLVMDisposePassManager(m_hFuncPassManager)
+    End If
     If m_hBuilder <> 0 Then
         Call LLVMDisposeBuilder(m_hBuilder)
     End If
