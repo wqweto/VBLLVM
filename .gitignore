@@ -331,3 +331,5 @@ ASALocalRun/
 
 lib/
 *.bc
+
+_del/

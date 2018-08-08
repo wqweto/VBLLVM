@@ -1,0 +1,14 @@
+# Auto detect text files and perform LF normalization
+* text eol=crlf
+
+*.exe -text
+*.dll -text
+*.cmp -text
+*.cobj -text
+*.tlb -text
+*.lib -text
+*.o -text
+
+# generated
+mdParser.bas -diff
+
