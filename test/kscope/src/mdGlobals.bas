@@ -398,3 +398,17 @@ Private Function UnsignedAdd(ByVal lUnsignedPtr As Long, ByVal lSignedOffset As 
     UnsignedAdd = ((lUnsignedPtr Xor &H80000000) + lSignedOffset) Xor &H80000000
 End Function
 
+' based on https://blogs.msdn.microsoft.com/twistylittlepassagesallalike/2011/04/23/everyone-quotes-command-line-arguments-the-wrong-way
+Public Function ArgvQuote(sArg As String, Optional ByVal Force As Boolean) As String
+    Const WHITESPACE As String = "*[ " & vbTab & vbVerticalTab & vbCrLf & "]*"
+    
+    If Not Force And LenB(sArg) <> 0 And Not sArg Like WHITESPACE Then
+        ArgvQuote = sArg
+    Else
+        With CreateObject("VBScript.RegExp")
+            .Global = True
+            .Pattern = "(\\+)($|"")|(\\+)"
+            ArgvQuote = """" & Replace(.Replace(sArg, "$1$1$2$3"), """", "\""") & """"
+        End With
+    End If
+End Function

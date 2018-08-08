@@ -48,6 +48,10 @@ Property Get LastError() As String
     LastError = m_sLastError
 End Property
 
+Property Get ModuleName() As String
+    ModuleName = m_sModuleName
+End Property
+
 '=========================================================================
 ' Methods
 '=========================================================================
@@ -58,7 +62,7 @@ Public Function Init(oTree As Object, oMachine As cTargetMachine, sModuleName As
     Set m_oMachine = oMachine
     m_sModuleName = sModuleName
     '--- setup LLVM module
-    m_hModule = LLVMModuleCreateWithName("module-" & m_sModuleName)
+    m_hModule = LLVMModuleCreateWithName(m_sModuleName & ".ks")
     If m_hModule = 0 Then
         GoTo QH
     End If
@@ -179,7 +183,7 @@ Public Function GetString() As String
 QH:
 End Function
 
-Public Function EmitToFile(ByVal sFile As String) As Boolean
+Public Function EmitToFile(sFile As String) As Boolean
     Dim lMsgPtr         As Long
     
     If LenB(sFile) = 0 Then
