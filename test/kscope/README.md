@@ -1,8 +1,8 @@
 ## LLVM's Kaleidoscope toy language VB6 port
 
-This test project ports to VBLLVM the [Kaleidoscope toy language](https://llvm.org/docs/tutorial/index.html) as implements in the original LLVM's tutorial.
+This test project ports to VBLLVM the [Kaleidoscope toy language](https://llvm.org/docs/tutorial/index.html) as implemented in the original LLVM's tutorial.
 
-`kscope.exe` implements both a cross-compiler (x64 and x86) and MCJIT-ed interpreter.
+Final `kscope.exe` implements both a cross-compiler (x64 and x86) and MCJIT-ed interpreter.
 
 ### How to compile grammar
 
