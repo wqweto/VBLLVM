@@ -65,6 +65,8 @@ Private Function Process(vArgs As Variant) As Long
     Dim vElem           As Variant
     Dim sTriple         As String
     Dim sLinker         As String
+    Dim lOptLevel       As Long
+    Dim lSizeLevel      As Long
     
     On Error GoTo EH
     Set m_oParser = New cParser
@@ -90,6 +92,8 @@ Private Function Process(vArgs As Variant) As Long
             "  -o OUTFILE      write result to OUTFILE [default: stdout]" & vbCrLf & _
             "  -c, -emit-obj   compile to COFF .obj file only [default: exe]" & vbCrLf & _
             "  -m32            compile for win32 target [default: x64]" & vbCrLf & _
+            "  -O NUM          optimization level [default: none]" & vbCrLf & _
+            "  -Os -Oz         optimize for size" & vbCrLf & _
             "  -emit-tree      output parse tree" & vbCrLf & _
             "  -emit-llvm      output intermediate represetation" & vbCrLf & _
             "  -q              in quiet operation outputs only errors" & vbCrLf & _
@@ -114,7 +118,6 @@ Private Function Process(vArgs As Variant) As Long
         Set oMachine = New cTargetMachine
         If Not oMachine.Init(sTriple) Then
             Err.Raise vbObjectError, , "Cannot init " & sTriple & ": " & oMachine.LastError
-            GoTo QH
         End If
         Set oJIT = New cJIT
         If Not oJIT.Init(oMachine) Then
@@ -126,10 +129,32 @@ Private Function Process(vArgs As Variant) As Long
         Set oMachine = New cTargetMachine
         If Not oMachine.Init(sTriple) Then
             Err.Raise vbObjectError, , "Cannot init " & sTriple & ": " & oMachine.LastError
-            GoTo QH
         End If
     End If
+    '-- parse optimization levels/size
+    lOptLevel = -1
+    lSizeLevel = -1
+    For lIdx = 0 To m_oOpt.Item("#O")
+        vElem = m_oOpt.Item("-O" & IIf(lIdx > 0, lIdx, vbNullString))
+        If IsNumeric(vElem) Then ' -O0, -O1, -O2 and  -O3
+            lOptLevel = C_Lng(vElem)
+            If lOptLevel < 0 Or lOptLevel > 3 Then
+                ConsoleError "Invalid optimization level: %1" & vbCrLf, vElem
+                GoTo QH
+            End If
+        ElseIf vElem = "s" Then ' -Os
+            lSizeLevel = 1
+        ElseIf vElem = "z" Then ' -Oz
+            lSizeLevel = 2
+        Else
+            ConsoleError "Unknown optimization setting: %1" & vbCrLf, vElem
+            GoTo QH
+        End If
+    Next
     For lIdx = 1 To m_oOpt.Item("numarg")
+        If Not m_oOpt.Item("-q") Then
+            ConsoleError "%1" & vbCrLf, PathDifference(CurDir$, m_oOpt.Item("arg" & lIdx))
+        End If
         Set oTree = m_oParser.MatchFile(m_oOpt.Item("arg" & lIdx))
         If LenB(m_oParser.LastError) <> 0 Then
             ConsoleError "%2: %3: %1" & vbCrLf, m_oParser.LastError, Join(m_oParser.CalcLine(m_oParser.LastOffset + 1), ":"), IIf(oTree Is Nothing, "error", "warning")
@@ -144,7 +169,7 @@ Private Function Process(vArgs As Variant) As Long
                     If Not oCodegen.Init(oTree, oMachine, GetFilePart(m_oOpt.Item("arg" & lIdx))) Then
                         Err.Raise vbObjectError, , "Cannot init codegen: " & oCodegen.LastError
                     End If
-                    If Not oCodegen.SetOptimize(C_Lng(m_oOpt.Item("-O"))) Then
+                    If Not oCodegen.SetOptimize(lOptLevel, lSizeLevel) Then
                         Err.Raise vbObjectError, , "Cannot set optimize: " & oCodegen.LastError
                     End If
                 End If

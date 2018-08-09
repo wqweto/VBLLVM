@@ -30,7 +30,7 @@ DefObj A-Z
 
 Private m_sLastError        As String
 Private m_sTriple           As String
-Private m_hMachine          As Long
+Private m_hMachine          As LLVMTargetMachineRef
 
 '=========================================================================
 ' Properties
@@ -69,7 +69,7 @@ Public Function Init(sTriple As String) As Boolean
 QH:
 End Function
 
-Public Function GetMachine() As Long
+Public Function GetMachine() As LLVMTargetMachineRef
     GetMachine = m_hMachine
 End Function
 

@@ -36,7 +36,8 @@ Private m_oMachine          As cTargetMachine
 Private m_sModuleName       As String
 Private m_hModule           As LLVMModuleRef
 Private m_hBuilder          As LLVMBuilderRef
-Private m_hFuncPassManager  As LLVMPassManagerRef
+Private m_lOptLevel         As Long
+Private m_lSizeLevel        As Long
 Private m_oModuleScope      As Scripting.Dictionary
 Private m_oLocalScope       As Scripting.Dictionary
 
@@ -61,6 +62,8 @@ Public Function Init(oTree As Object, oMachine As cTargetMachine, sModuleName As
     Set m_oTree = oTree
     Set m_oMachine = oMachine
     m_sModuleName = sModuleName
+    m_lOptLevel = -1
+    m_lSizeLevel = -1
     '--- setup LLVM module
     m_hModule = LLVMModuleCreateWithName(m_sModuleName & ".ks")
     If m_hModule = 0 Then
@@ -80,19 +83,9 @@ Public Function Init(oTree As Object, oMachine As cTargetMachine, sModuleName As
 QH:
 End Function
 
-Public Function SetOptimize(ByVal lLevel As Long) As Boolean
-    If lLevel = 0 Then
-        If m_hFuncPassManager <> 0 Then
-            Call LLVMDisposePassManager(m_hFuncPassManager)
-            m_hFuncPassManager = 0
-        End If
-    Else
-        m_hFuncPassManager = LLVMCreateFunctionPassManagerForModule(m_hModule)
-        Call LLVMInitializeFunctionPassManager(m_hFuncPassManager)
-        Call LLVMAddConstantPropagationPass(m_hFuncPassManager)
-        Call LLVMAddReassociatePass(m_hFuncPassManager)
-        Call LLVMAddCFGSimplificationPass(m_hFuncPassManager)
-    End If
+Public Function SetOptimize(ByVal lOptLevel As Long, ByVal lSizeLevel As Long) As Boolean
+    m_lOptLevel = lOptLevel
+    m_lSizeLevel = lSizeLevel
     '--- success
     SetOptimize = True
 End Function
@@ -151,6 +144,9 @@ End Function
 Public Function GetModule() As LLVMModuleRef
     Dim lMsgPtr         As Long
     
+    If m_lOptLevel >= 0 Or m_lSizeLevel >= 0 Then
+        pvRunPassManagers m_hModule, m_lOptLevel, m_lSizeLevel
+    End If
     If LLVMVerifyModule(m_hModule, LLVMAbortProcessAction, lMsgPtr) <> 0 Then
         m_sLastError = ToString(lMsgPtr)
         Call LLVMDisposeMessage(lMsgPtr)
@@ -168,14 +164,14 @@ Public Function GetFunction(sName As String) As LLVMValueRef
 End Function
 
 Public Function GetString() As String
+    Dim hModule         As LLVMModuleRef
     Dim lMsgPtr         As Long
     
-    If LLVMVerifyModule(m_hModule, LLVMAbortProcessAction, lMsgPtr) <> 0 Then
-        m_sLastError = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
+    hModule = GetModule()
+    If hModule = 0 Then
         GoTo QH
     End If
-    lMsgPtr = LLVMPrintModuleToString(m_hModule)
+    lMsgPtr = LLVMPrintModuleToString(hModule)
     If lMsgPtr <> 0 Then
         GetString = ToString(lMsgPtr)
         Call LLVMDisposeMessage(lMsgPtr)
@@ -184,12 +180,23 @@ QH:
 End Function
 
 Public Function EmitToFile(sFile As String) As Boolean
+    Dim hModule         As LLVMModuleRef
+    Dim hMachine        As LLVMTargetMachineRef
     Dim lMsgPtr         As Long
     
+    hModule = GetModule()
+    If hModule = 0 Then
+        GoTo QH
+    End If
+    hMachine = m_oMachine.GetMachine()
+    If hMachine = 0 Then
+        m_sLastError = m_oMachine.LastError
+        GoTo QH
+    End If
     If LenB(sFile) = 0 Then
         sFile = m_sModuleName & ".o"
     End If
-    If LLVMTargetMachineEmitToFile(m_oMachine.GetMachine(), m_hModule, sFile, LLVMObjectFile, lMsgPtr) <> 0 Then
+    If LLVMTargetMachineEmitToFile(hMachine, hModule, sFile, LLVMObjectFile, lMsgPtr) <> 0 Then
         m_sLastError = ToString(lMsgPtr)
         Call LLVMDisposeMessage(lMsgPtr)
         GoTo QH
@@ -235,12 +242,6 @@ Public Function VisitDef(oNode As Scripting.Dictionary, hResult As LLVMValueRef)
     If LLVMVerifyFunction(hFunc, LLVMPrintMessageAction) = 1 Then
         Call LLVMDeleteFunction(hFunc)
         GoTo QH
-    End If
-    If m_hFuncPassManager <> 0 Then
-        If LLVMRunFunctionPassManager(m_hFuncPassManager, hFunc) = 1 Then
-            Call LLVMDeleteFunction(hFunc)
-            GoTo QH
-        End If
     End If
     '--- success
     VisitDef = True
@@ -573,6 +574,46 @@ Private Function pvScopeResolve(ByVal oScope As Scripting.Dictionary, sName As S
     Loop
 End Function
 
+Private Sub pvRunPassManagers(ByVal hModule As LLVMModuleRef, ByVal lOptLevel As Long, ByVal lSizeLevel As Long)
+    Dim hPassMgrBuilder As LLVMPassManagerBuilderRef
+    Dim hFuncPassMgr    As LLVMPassManagerRef
+    Dim hFunc           As LLVMValueRef
+    Dim hModPassMgr     As LLVMPassManagerRef
+    
+    hPassMgrBuilder = LLVMPassManagerBuilderCreate()
+    If lOptLevel >= 0 Then
+        Call LLVMPassManagerBuilderSetOptLevel(hPassMgrBuilder, lOptLevel)
+    End If
+    If lSizeLevel >= 0 Then
+        Call LLVMPassManagerBuilderSetSizeLevel(hPassMgrBuilder, lSizeLevel)
+    End If
+    Call LLVMPassManagerBuilderUseInlinerWithThreshold(hPassMgrBuilder, 512)
+    '--- per function optimizations
+    hFuncPassMgr = LLVMCreateFunctionPassManagerForModule(hModule)
+    Call LLVMPassManagerBuilderPopulateFunctionPassManager(hPassMgrBuilder, hFuncPassMgr)
+    Call LLVMInitializeFunctionPassManager(hFuncPassMgr)
+    hFunc = LLVMGetFirstFunction(hModule)
+    Do While hFunc <> 0
+        Call LLVMRunFunctionPassManager(hFuncPassMgr, hFunc)
+        hFunc = LLVMGetNextFunction(hFunc)
+    Loop
+    Call LLVMFinalizeFunctionPassManager(hFuncPassMgr)
+    '--- whole module optimizations
+    hModPassMgr = LLVMCreatePassManager()
+    Call LLVMPassManagerBuilderPopulateModulePassManager(hPassMgrBuilder, hModPassMgr)
+    Call LLVMRunPassManager(hModPassMgr, hModule)
+QH:
+    If hFuncPassMgr <> 0 Then
+        Call LLVMDisposePassManager(hFuncPassMgr)
+    End If
+    If hModPassMgr <> 0 Then
+        Call LLVMDisposePassManager(hModPassMgr)
+    End If
+    If hPassMgrBuilder <> 0 Then
+        Call LLVMPassManagerBuilderDispose(hPassMgrBuilder)
+    End If
+End Sub
+
 'Private Sub pvAddLLVMAttrStr(ByVal hFunc As LLVMValueRef, sName As String, sValue As String)
 '    Dim hAttr           As LLVMAttributeRef
 '
@@ -599,9 +640,6 @@ End Function
 '=========================================================================
 
 Private Sub Class_Terminate()
-    If m_hFuncPassManager <> 0 Then
-        Call LLVMDisposePassManager(m_hFuncPassManager)
-    End If
     If m_hBuilder <> 0 Then
         Call LLVMDisposeBuilder(m_hBuilder)
     End If
