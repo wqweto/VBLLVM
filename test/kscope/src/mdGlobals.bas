@@ -372,8 +372,16 @@ End Sub
 
 Public Function ToString(ByVal lPtr As Long) As String
     If lPtr <> 0 Then
-        ToString = String(lstrlen(lPtr), Chr(0))
-        Call CopyMemory(ByVal ToString, ByVal lPtr, lstrlen(lPtr))
+        ToString = String$(lstrlen(lPtr), 0)
+        Call CopyMemory(ByVal ToString, ByVal lPtr, Len(ToString))
+        Call LLVMDisposeMessage(lPtr)
+    End If
+End Function
+
+Public Function ToStringCopy(ByVal lPtr As Long) As String
+    If lPtr <> 0 Then
+        ToStringCopy = String$(lstrlen(lPtr), 0)
+        Call CopyMemory(ByVal ToStringCopy, ByVal lPtr, Len(ToStringCopy))
     End If
 End Function
 

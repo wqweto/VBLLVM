@@ -48,18 +48,17 @@ End Property
 ' Methods
 '=========================================================================
 
-Public Function Init(sTriple As String) As Boolean
+Public Function Init(sTriple As String, Optional ByVal IsJIT As Boolean) As Boolean
     Dim hTarget         As Long
     Dim lMsgPtr         As Long
 
     m_sTriple = sTriple
     If LLVMGetTargetFromTriple(sTriple, hTarget, lMsgPtr) <> 0 Then
         m_sLastError = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
         GoTo QH
     End If
     m_hMachine = LLVMCreateTargetMachine(hTarget, sTriple, "generic", "", _
-            LLVMCodeGenLevelAggressive, LLVMRelocDefault, LLVMCodeModelSmall)
+            LLVMCodeGenLevelAggressive, LLVMRelocDefault, IIf(IsJIT, LLVMCodeModelJITDefault, LLVMCodeModelDefault))
     If m_hMachine = 0 Then
         m_sLastError = "LLVMCreateTargetMachine failed for " & sTriple
         GoTo QH

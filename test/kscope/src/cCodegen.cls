@@ -149,7 +149,6 @@ Public Function GetModule() As LLVMModuleRef
     End If
     If LLVMVerifyModule(m_hModule, LLVMAbortProcessAction, lMsgPtr) <> 0 Then
         m_sLastError = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
         GoTo QH
     End If
     GetModule = m_hModule
@@ -165,17 +164,12 @@ End Function
 
 Public Function GetString() As String
     Dim hModule         As LLVMModuleRef
-    Dim lMsgPtr         As Long
     
     hModule = GetModule()
     If hModule = 0 Then
         GoTo QH
     End If
-    lMsgPtr = LLVMPrintModuleToString(hModule)
-    If lMsgPtr <> 0 Then
-        GetString = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
-    End If
+    GetString = ToString(LLVMPrintModuleToString(hModule))
 QH:
 End Function
 
@@ -198,7 +192,6 @@ Public Function EmitToFile(sFile As String) As Boolean
     End If
     If LLVMTargetMachineEmitToFile(hMachine, hModule, sFile, LLVMObjectFile, lMsgPtr) <> 0 Then
         m_sLastError = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
         GoTo QH
     End If
     '--- success
@@ -229,7 +222,7 @@ Public Function VisitDef(oNode As Scripting.Dictionary, hResult As LLVMValueRef)
     For lIdx = 0 To LLVMCountParams(hFunc) - 1
         hParam = LLVMGetParam(hFunc, lIdx)
         Debug.Assert hParam <> 0
-        sName = ToString(LLVMGetValueName(hParam))
+        sName = ToStringCopy(LLVMGetValueName(hParam))
         hAlloca = pvCreateEntryBlockAlloca(hFunc, sName)
         Call LLVMBuildStore(m_hBuilder, hParam, hAlloca)
         m_oLocalScope.Item(sName) = hAlloca
@@ -619,10 +612,10 @@ End Sub
 '
 '    hAttr = LLVMCreateStringAttribute(LLVMGetGlobalContext(), sName, Len(sName), sValue, Len(sValue))
 '    If hAttr <> 0 Then
-'        Call LLVMAddAttributeAtIndex(hFunc, -1, hAttr)
+'        Call LLVMAddAttributeAtIndex(hFunc, LLVMAttributeFunctionIndex, hAttr)
 '    End If
 'End Sub
-
+'
 'Private Sub pvAddLLVMAttrInt(ByVal hFunc As LLVMValueRef, sName As String, Optional ByVal lValue As Long)
 '    Dim lKind           As Long
 '    Dim hAttr           As LLVMAttributeRef
@@ -631,7 +624,7 @@ End Sub
 '    Debug.Assert lKind <> 0
 '    hAttr = LLVMCreateEnumAttribute(LLVMGetGlobalContext(), lKind, lValue * 10000)
 '    If hAttr <> 0 Then
-'        Call LLVMAddAttributeAtIndex(hFunc, -1, hAttr)
+'        Call LLVMAddAttributeAtIndex(hFunc, LLVMAttributeFunctionIndex, hAttr)
 '    End If
 'End Sub
 

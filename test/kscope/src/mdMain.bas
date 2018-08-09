@@ -116,7 +116,7 @@ Private Function Process(vArgs As Variant) As Long
     If Not m_oOpt.Item("-emit-tree") And Not m_oOpt.Item("-emit-llvm") And Not m_oOpt.Item("-c") And LenB(sOutFile) = 0 Then
         sTriple = ToString(LLVMGetDefaultTargetTriple())
         Set oMachine = New cTargetMachine
-        If Not oMachine.Init(sTriple) Then
+        If Not oMachine.Init(sTriple, IsJIT:=True) Then
             Err.Raise vbObjectError, , "Cannot init " & sTriple & ": " & oMachine.LastError
         End If
         Set oJIT = New cJIT
@@ -278,7 +278,7 @@ Property Get AvailableTargets() As Variant
     hTarget = LLVMGetFirstTarget()
     Do While hTarget <> 0
         ReDim Preserve vRet(0 To UBound(vRet) + 1) As Variant
-        vRet(UBound(vRet)) = ToString(LLVMGetTargetName(hTarget))
+        vRet(UBound(vRet)) = ToStringCopy(LLVMGetTargetName(hTarget))
         hTarget = LLVMGetNextTarget(hTarget)
     Loop
     AvailableTargets = vRet

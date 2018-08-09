@@ -59,7 +59,6 @@ Public Function Init(oMachine As cTargetMachine) As Boolean
     pvAddRuntimeFunction hModule, "printd", AddressOf RuntimePrintd
     If LLVMCreateExecutionEngineForModule(m_hEngine, hModule, lMsgPtr) <> 0 Then
         m_sLastError = ToString(lMsgPtr)
-        Call LLVMDisposeMessage(lMsgPtr)
         GoTo QH
     End If
     '--- success
