@@ -777,6 +777,8 @@ EXPORTS
   LLVMDisposeTargetMachine=_LLVMDisposeTargetMachine@4
   LLVMGetDefaultTargetTriple=_LLVMGetDefaultTargetTriple@0
   LLVMGetFirstTarget=_LLVMGetFirstTarget@0
+  LLVMGetHostCPUFeatures=_LLVMGetHostCPUFeatures@0
+  LLVMGetHostCPUName=_LLVMGetHostCPUName@0
   LLVMGetNextTarget=_LLVMGetNextTarget@4
   LLVMGetTargetDescription=_LLVMGetTargetDescription@4
   LLVMGetTargetFromName=_LLVMGetTargetFromName@4
@@ -786,6 +788,7 @@ EXPORTS
   LLVMGetTargetMachineTarget=_LLVMGetTargetMachineTarget@4
   LLVMGetTargetMachineTriple=_LLVMGetTargetMachineTriple@4
   LLVMGetTargetName=_LLVMGetTargetName@4
+  LLVMNormalizeTargetTriple=_LLVMNormalizeTargetTriple@4
   LLVMSetTargetMachineAsmVerbosity=_LLVMSetTargetMachineAsmVerbosity@8
   LLVMTargetHasAsmBackend=_LLVMTargetHasAsmBackend@4
   LLVMTargetHasJIT=_LLVMTargetHasJIT@4

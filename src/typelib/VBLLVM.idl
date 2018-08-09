@@ -3502,6 +3502,13 @@ library VBLLVM
                         [in, out] LLVMMemoryBufferRef * OutMemBuf);
         [entry("LLVMGetDefaultTargetTriple")]
                 LONG LLVMGetDefaultTargetTriple();
+        [entry("LLVMNormalizeTargetTriple")]
+                LONG LLVMNormalizeTargetTriple(
+                        [in] LPSTR triple);
+        [entry("LLVMGetHostCPUName")]
+                LONG LLVMGetHostCPUName();
+        [entry("LLVMGetHostCPUFeatures")]
+                LONG LLVMGetHostCPUFeatures();
         [entry("LLVMAddAnalysisPasses")]
                 void LLVMAddAnalysisPasses(
                         [in] LLVMTargetMachineRef T,

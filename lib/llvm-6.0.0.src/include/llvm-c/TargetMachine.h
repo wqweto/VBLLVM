@@ -137,6 +137,18 @@ LLVMBool LLVM_STDCALL LLVMTargetMachineEmitToMemoryBuffer(LLVMTargetMachineRef T
   disposed with LLVMDisposeMessage. */
 char* LLVM_STDCALL LLVMGetDefaultTargetTriple(void);
 
+/** Normalize a target triple. The result needs to be disposed with
+  LLVMDisposeMessage. */
+char* LLVM_STDCALL LLVMNormalizeTargetTriple(const char* triple);
+
+/** Get the host CPU as a string. The result needs to be disposed with
+  LLVMDisposeMessage. */
+char* LLVM_STDCALL LLVMGetHostCPUName(void);
+
+/** Get the host CPU's features as a string. The result needs to be disposed
+  with LLVMDisposeMessage. */
+char* LLVM_STDCALL LLVMGetHostCPUFeatures(void);
+
 /** Adds the target-specific analysis passes to the pass manager. */
 void LLVM_STDCALL LLVMAddAnalysisPasses(LLVMTargetMachineRef T, LLVMPassManagerRef PM);
 

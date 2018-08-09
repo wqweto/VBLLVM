@@ -25,6 +25,7 @@
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/MC/SubtargetFeature.h"
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
@@ -235,6 +236,25 @@ LLVMBool LLVM_STDCALL LLVMTargetMachineEmitToMemoryBuffer(LLVMTargetMachineRef T
 
 char *LLVM_STDCALL LLVMGetDefaultTargetTriple(void) {
   return strdup(sys::getDefaultTargetTriple().c_str());
+}
+
+char *LLVM_STDCALL LLVMNormalizeTargetTriple(const char* triple) {
+  return strdup(Triple::normalize(StringRef(triple)).c_str());
+}
+
+char *LLVM_STDCALL LLVMGetHostCPUName(void) {
+  return strdup(sys::getHostCPUName().data());
+}
+
+char *LLVM_STDCALL LLVMGetHostCPUFeatures(void) {
+  SubtargetFeatures Features;
+  StringMap<bool> HostFeatures;
+
+  if (sys::getHostCPUFeatures(HostFeatures))
+    for (auto &F : HostFeatures)
+      Features.AddFeature(F.first(), F.second);
+
+  return strdup(Features.getString().c_str());
 }
 
 void LLVM_STDCALL LLVMAddAnalysisPasses(LLVMTargetMachineRef T, LLVMPassManagerRef PM) {
