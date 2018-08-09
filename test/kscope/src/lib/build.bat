@@ -7,10 +7,10 @@ for %%i in ("%out_dir%\.") do set out_dir=%%~dpnxi
 
 echo Building %out_dir%\win32
 %dlltool_exe% -m i386 -d "%~dp0kernel32.def" -l "%out_dir%\win32\kernel32.lib" -k
-%cc_exe% -target i686-pc-windows-msvc -c "%~dp0startup.c" -o "%out_dir%\win32\startup.o"
+%cc_exe% -target i686-pc-windows-msvc -c "%~dp0startup.c" -o "%out_dir%\win32\startup.obj"
 
 echo Building %out_dir%\x64
 %dlltool_exe% -m i386:x86-64 -d "%~dp0kernel32_x64.def" -l "%out_dir%\x64\kernel32.lib"
-%cc_exe% -target x86_64-pc-windows-msvc -c "%~dp0startup.c" -o "%out_dir%\x64\startup.o"
+%cc_exe% -target x86_64-pc-windows-msvc -c "%~dp0startup.c" -o "%out_dir%\x64\startup.obj"
 
 echo Done.

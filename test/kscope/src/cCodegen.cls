@@ -194,7 +194,7 @@ Public Function EmitToFile(sFile As String) As Boolean
         GoTo QH
     End If
     If LenB(sFile) = 0 Then
-        sFile = m_sModuleName & ".o"
+        sFile = m_sModuleName & ".obj"
     End If
     If LLVMTargetMachineEmitToFile(hMachine, hModule, sFile, LLVMObjectFile, lMsgPtr) <> 0 Then
         m_sLastError = ToString(lMsgPtr)

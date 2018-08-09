@@ -206,7 +206,7 @@ Private Function Process(vArgs As Variant) As Long
                 sOutFile = vbNullString
             ElseIf LenB(sOutFile) <> 0 Then
                 For lJdx = 1 To 1000
-                    sObjFile = sObjPath & oCodegen.ModuleName & IIf(lJdx > 1, lJdx, vbNullString) & ".o"
+                    sObjFile = sObjPath & oCodegen.ModuleName & IIf(lJdx > 1, lJdx, vbNullString) & ".obj"
                     If Not FileExists(sObjFile) Then
                         Exit For
                     End If

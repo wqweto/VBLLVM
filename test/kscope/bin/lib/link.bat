@@ -6,7 +6,7 @@ set out_file="%~2"
 set kernel_lib="%~dp0%lib_arch%\kernel32.lib"
 if not exist %kernel_lib% echo No %lib_arch% support files found& exit /b 1
 
-set startup_obj="%~dp0%lib_arch%\startup.o"
+set startup_obj="%~dp0%lib_arch%\startup.obj"
 if not exist %startup_obj% echo No %lib_arch% support files found& exit /b 1
 
 set link_exe="%ProgramFiles(x86)%\LLVM\bin\lld-link.exe"
