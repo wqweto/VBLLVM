@@ -123,7 +123,7 @@ Private Function Process(vArgs As Variant) As Long
         If Not oJIT.Init(oMachine) Then
             Err.Raise vbObjectError, , "Cannot init JIT: " & oJIT.LastError
         End If
-        ConsoleError "Using MCJIT on %1" & vbCrLf, sTriple
+        ConsoleError "Using MCJIT on %1, %2" & vbCrLf, sTriple, ToString(LLVMGetHostCPUName)
     Else
         sTriple = IIf(m_oOpt.Item("-m32"), "i686-pc-windows-msvc", "x86_64-pc-windows-msvc")
         Set oMachine = New cTargetMachine

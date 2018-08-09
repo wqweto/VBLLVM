@@ -57,8 +57,17 @@ Public Function Init(sTriple As String, Optional ByVal IsJIT As Boolean) As Bool
         m_sLastError = ToString(lMsgPtr)
         GoTo QH
     End If
-    m_hMachine = LLVMCreateTargetMachine(hTarget, sTriple, "generic", "", _
-            LLVMCodeGenLevelAggressive, LLVMRelocDefault, IIf(IsJIT, LLVMCodeModelJITDefault, LLVMCodeModelDefault))
+    If IsJIT Then
+        m_hMachine = LLVMCreateTargetMachine(hTarget, sTriple, _
+            ToString(LLVMGetHostCPUName), _
+            ToString(LLVMGetHostCPUFeatures), _
+            LLVMCodeGenLevelAggressive, _
+            LLVMRelocDefault, _
+            LLVMCodeModelJITDefault)
+    Else
+        m_hMachine = LLVMCreateTargetMachine(hTarget, sTriple, _
+            "generic", "", LLVMCodeGenLevelNone, LLVMRelocDefault, LLVMCodeModelDefault)
+    End If
     If m_hMachine = 0 Then
         m_sLastError = "LLVMCreateTargetMachine failed for " & sTriple
         GoTo QH

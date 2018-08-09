@@ -45,19 +45,24 @@ End Property
 '=========================================================================
 
 Public Function Init(oMachine As cTargetMachine) As Boolean
+    Dim uOptions        As LLVMMCJITCompilerOptions
     Dim hModule         As Long
     Dim lMsgPtr         As Long
     
-    hModule = LLVMModuleCreateWithName("empty module")
+    '--- init module w/ runtime functions
+    hModule = LLVMModuleCreateWithName("runtime")
     If hModule = 0 Then
-        m_sLastError = "Cannot create empty module"
+        m_sLastError = "Cannot create runtime module"
         GoTo QH
     End If
     Call LLVMSetTarget(hModule, oMachine.Triple)
     Call LLVMSetModuleDataLayout(hModule, LLVMCreateTargetDataLayout(oMachine.GetMachine()))
     pvAddRuntimeFunction hModule, "putchard", AddressOf RuntimePutchard
     pvAddRuntimeFunction hModule, "printd", AddressOf RuntimePrintd
-    If LLVMCreateExecutionEngineForModule(m_hEngine, hModule, lMsgPtr) <> 0 Then
+    '--- init MCJIT engine
+    Call LLVMInitializeMCJITCompilerOptions(uOptions, LenB(uOptions))
+    uOptions.NoFramePointerElim = 1
+    If LLVMCreateMCJITCompilerForModule(m_hEngine, hModule, uOptions, LenB(uOptions), lMsgPtr) <> 0 Then
         m_sLastError = ToString(lMsgPtr)
         GoTo QH
     End If

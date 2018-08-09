@@ -221,7 +221,6 @@ Public Function VisitDef(oNode As Scripting.Dictionary, hResult As LLVMValueRef)
     pvScopePush oScope
     For lIdx = 0 To LLVMCountParams(hFunc) - 1
         hParam = LLVMGetParam(hFunc, lIdx)
-        Debug.Assert hParam <> 0
         sName = ToStringCopy(LLVMGetValueName(hParam))
         hAlloca = pvCreateEntryBlockAlloca(hFunc, sName)
         Call LLVMBuildStore(m_hBuilder, hParam, hAlloca)
@@ -290,13 +289,11 @@ Public Function VisitPrototype(oNode As Scripting.Dictionary, hResult As LLVMVal
             aParams(lIdx) = LLVMDoubleType()
         Next
         hType = LLVMFunctionType(LLVMDoubleType(), aParams(0), lCount, 0)
-        Debug.Assert hType <> 0
         hResult = LLVMAddFunction(m_hModule, sName, hType)
         m_oModuleScope.Item(sName) = hResult
     End If
     For lIdx = 0 To lCount - 1
         hParam = LLVMGetParam(hResult, lIdx)
-        Debug.Assert hParam <> 0
         Call LLVMSetValueName(hParam, JsonItem(oNode, "Params/" & lIdx))
     Next
     '--- success

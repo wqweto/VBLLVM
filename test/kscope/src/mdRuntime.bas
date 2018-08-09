@@ -13,7 +13,7 @@ Option Explicit
 DefObj A-Z
 
 Public Function RuntimePutchard(ByVal dblValue As Double) As Double
-    If dblValue = 10 Then
+    If dblValue = 10 And Not InIde Then
         ConsoleError vbCr
     End If
     ConsoleError ChrW(dblValue)
