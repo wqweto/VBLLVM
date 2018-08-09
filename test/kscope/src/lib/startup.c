@@ -15,11 +15,12 @@ extern int __stdcall WriteFile(void *HANDLE, const void *lpBuffer, unsigned int 
 extern void __stdcall ExitProcess(unsigned int exit_code);
 
 extern double __anon_expr();
-char *dtoa(double x, char *out);
+static char *dtoa(double x, char *out);
 
 #define STD_ERROR_HANDLE -12
 
-double putchard(double x) {
+static double 
+putchard(double x) {
     char ch;
     
     ch = x;
@@ -27,7 +28,8 @@ double putchard(double x) {
     return x;
 }
 
-double printd(double x) {
+static double 
+printd(double x) {
     char buf[32], *p;
     
     p = dtoa(x, buf);
@@ -37,7 +39,8 @@ double printd(double x) {
     return x;
 }
 
-char *dtoa(double x, char *out) {
+static char *
+dtoa(double x, char *out) {
     char buf[32], *p, *b;
     int i;
     
@@ -74,8 +77,10 @@ char *dtoa(double x, char *out) {
     return out;
 }
 
-void __runtime_main(void) {
+static void 
+__runtime_main(void) {
     double res = 0;
+    
     #ifndef TEST
         res = __anon_expr();
     #endif
@@ -85,7 +90,8 @@ void __runtime_main(void) {
 }
 
 #ifdef TEST
-int main() {
+static int 
+main() {
     printd(123.456);
     printd(-7890.456);
     printd(-0.123);
