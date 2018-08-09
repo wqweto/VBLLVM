@@ -1,6 +1,6 @@
 Type=Exe
-Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\..\Windows\SysWOW64\stdole2.tlb#OLE Automation
-Reference=*\G{B64B59AE-8789-49B7-9BA9-0453819E63CA}#1.0#0#..\..\..\..\..\Dreem\1.5\Binn\UcsDsQuery.tlb#Unicontsoft Active Directory Query Type Library 1.0
+Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\Windows\SysWOW64\stdole2.tlb#OLE Automation
+Reference=*\G{B64B59AE-8789-49B7-9BA9-0453819E63CA}#1.0#0#..\..\..\..\Dreem\1.5\Binn\UcsDsQuery.tlb#Unicontsoft Active Directory Query Type Library 1.0
 Module=mdParser; mdParser.bas
 Module=mdGlobals; mdGlobals.bas
 Module=mdJson; mdJson.bas
@@ -9,7 +9,7 @@ Startup="Sub Main"
 HelpFile=""
 Title="GenIdl"
 ExeName32="gen_idl.exe"
-Command32="C:\Work\Temp\VBLLVM\lib\llvm-6.0.0.src\include\llvm-c -def C:\Work\Temp\VBLLVM\src\VBLLVM.def -o nul:                     "
+Command32="C:\Work\Temp\VBLLVM\lib\llvm-6.0.0.src\include\llvm-c -def C:\Work\Temp\VBLLVM\src\VBLLVM.def -o nul                     "
 Name="GenIdl"
 HelpContextID="0"
 CompatibleMode="0"

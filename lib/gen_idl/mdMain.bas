@@ -159,7 +159,9 @@ QH:
         Clipboard.Clear
         Clipboard.SetText ConcatCollection(cOutput, vbCrLf)
     End If
-    If LenB(oOpt.Item("-o")) <> 0 Then
+    If oOpt.Item("-o") = "nul" Then
+        '--- do nothing
+    ElseIf LenB(oOpt.Item("-o")) <> 0 Then
         WriteTextFile oOpt.Item("-o"), ConcatCollection(cOutput, vbCrLf), ucsFltAnsi
         If Not FileExists(oOpt.Item("-o")) Then
             ConsoleError "Error: Writing %1" & vbCrLf, oOpt.Item("-o")
@@ -190,6 +192,12 @@ Private Sub pvIncludeFile(uState As UcsStateType, oInclude As Object)
         Case "StructDecl"
             uState.Typedefs.Add oItem, JsonItem(oItem, "Name")
         Case "EnumDecl"
+            If IsEmpty(JsonItem(oItem, "Name")) Then
+                If JsonItem(oItem, "Items/0/Name") = "LLVMAttributeReturnIndex" Then
+                    JsonItem(oItem, "Name") = "LLVMAttributeIndex"
+                    JsonItem(oItem, "Items/0/Value") = "0"
+                End If
+            End If
             If Not IsEmpty(JsonItem(oItem, "Name")) Then
                 uState.Typedefs.Add oItem, JsonItem(oItem, "Name")
             End If
