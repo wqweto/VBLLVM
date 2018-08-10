@@ -378,9 +378,13 @@ Public Function ToString(ByVal lPtr As Long) As String
     End If
 End Function
 
-Public Function ToStringCopy(ByVal lPtr As Long) As String
+Public Function ToStringCopy(ByVal lPtr As Long, Optional ByVal lSize As Long = -1) As String
     If lPtr <> 0 Then
-        ToStringCopy = String$(lstrlen(lPtr), 0)
+        If lSize < 0 Then
+            ToStringCopy = String$(lstrlen(lPtr), 0)
+        Else
+            ToStringCopy = String$(lSize, 0)
+        End If
         Call CopyMemory(ByVal ToStringCopy, ByVal lPtr, Len(ToStringCopy))
     End If
 End Function

@@ -23,7 +23,7 @@ Private Declare Function DeleteFile Lib "kernel32" Alias "DeleteFileA" (ByVal lp
 ' Constants and member variables
 '=========================================================================
 
-Private Const STR_VERSION           As String = "0.1"
+Private Const STR_VERSION           As String = "0.2"
 
 Private m_oParser               As cParser
 Private m_oOpt                  As Scripting.Dictionary
@@ -61,16 +61,14 @@ Private Function Process(vArgs As Variant) As Long
     Dim cObjFiles       As Collection
     Dim sObjPath        As String
     Dim sObjFile        As String
-    Dim sCmd            As String
     Dim vElem           As Variant
     Dim sTriple         As String
-    Dim sLinker         As String
     Dim lOptLevel       As Long
     Dim lSizeLevel      As Long
     
     On Error GoTo EH
     Set m_oParser = New cParser
-    Set m_oOpt = GetOpt(vArgs, "o:O")
+    Set m_oOpt = GetOpt(vArgs, "o:O:target")
     If Not m_oOpt.Item("-nologo") And Not m_oOpt.Item("-q") Then
         ConsoleError App.ProductName & " VB6 port " & STR_VERSION & ", " & ToString(LLVMGetDefaultTargetTriple()) & " (c) 2018 by wqweto@gmail.com (" & m_oParser.ParserVersion & ")" & vbCrLf & vbCrLf
     End If
@@ -90,12 +88,13 @@ Private Function Process(vArgs As Variant) As Long
         ConsoleError "Usage: %1.exe [options] <in_file.ks>" & vbCrLf & vbCrLf, App.EXEName
         ConsoleError "Options:" & vbCrLf & _
             "  -o OUTFILE      write result to OUTFILE [default: stdout]" & vbCrLf & _
-            "  -c, -emit-obj   compile to COFF .obj file only [default: exe]" & vbCrLf & _
+            "  -c, -emit-obj   compile to object file only [default: exe]" & vbCrLf & _
             "  -m32            compile for win32 target [default: x64]" & vbCrLf & _
             "  -O NUM          optimization level [default: none]" & vbCrLf & _
             "  -Os -Oz         optimize for size" & vbCrLf & _
             "  -emit-tree      output parse tree" & vbCrLf & _
             "  -emit-llvm      output intermediate represetation" & vbCrLf & _
+            "  -target TRIPLE  cross-compile to target OS/CPU" & vbCrLf & _
             "  -q              in quiet operation outputs only errors" & vbCrLf & _
             "  -nologo         suppress startup banner" & vbCrLf & _
             "  -version        dump available targets" & vbCrLf & _
@@ -125,7 +124,12 @@ Private Function Process(vArgs As Variant) As Long
         End If
         ConsoleError "Using MCJIT on %1, %2" & vbCrLf, sTriple, ToString(LLVMGetHostCPUName)
     Else
-        sTriple = IIf(m_oOpt.Item("-m32"), "i686-pc-windows-msvc", "x86_64-pc-windows-msvc")
+        If LenB(m_oOpt.Item("-target")) <> 0 Then
+            sTriple = m_oOpt.Item("-target")
+        Else
+            sTriple = IIf(m_oOpt.Item("-m32"), "i686-pc-windows-msvc", "x86_64-pc-windows-msvc")
+            'sTriple = IIf(m_oOpt.Item("-m32"), "i686-unknown-linux-gnu", "x86_64-unknown-linux-gnu")
+        End If
         Set oMachine = New cTargetMachine
         If Not oMachine.Init(sTriple) Then
             Err.Raise vbObjectError, , "Cannot init " & sTriple & ": " & oMachine.LastError
@@ -206,7 +210,7 @@ Private Function Process(vArgs As Variant) As Long
                 sOutFile = vbNullString
             ElseIf LenB(sOutFile) <> 0 Then
                 For lJdx = 1 To 1000
-                    sObjFile = sObjPath & oCodegen.ModuleName & IIf(lJdx > 1, lJdx, vbNullString) & ".obj"
+                    sObjFile = PathCombine(sObjPath, oCodegen.ModuleName & IIf(lJdx > 1, lJdx, vbNullString) & "." & pvGetObjFileExt(oMachine.ObjectFormat))
                     If Not FileExists(sObjFile) Then
                         Exit For
                     End If
@@ -219,18 +223,12 @@ Private Function Process(vArgs As Variant) As Long
             End If
         End If
     Next
-    '--- shell linker
+    '--- link w/ LLVM's lld
     If cObjFiles.Count > 0 Then
-        For Each vElem In cObjFiles
-            sCmd = sCmd & " " & ArgvQuote(C_Str(vElem))
-        Next
-        sLinker = PathCombine(App.Path, IIf(InIde, "..\bin\", vbNullString) & "lib\link.bat")
-        If Not FileExists(sLinker) Then
-            Err.Raise vbObjectError, , "Linker " & sLinker & " not found"
-        End If
-        sCmd = ArgvQuote(sLinker) & " " & IIf(m_oOpt.Item("-m32"), "win32", "x64") & " " & ArgvQuote(sOutFile) & sCmd
         Call DeleteFile(sOutFile)
-        CreateObject("WScript.Shell").Run sCmd, 0, True
+        If LLVMLLDLink(oMachine.ObjectFormat, pvGetLinkerArgs(oMachine, cObjFiles, sOutFile), AddressOf pvLinkDiagnosticHandler, 0) = 0 Then
+            '--- link error
+        End If
         If FileExists(sOutFile) And Not m_oOpt.Item("-q") Then
             ConsoleError "File %1 emitted successfully" & vbCrLf, sOutFile
         End If
@@ -284,3 +282,73 @@ Property Get AvailableTargets() As Variant
     AvailableTargets = vRet
 End Property
 
+Private Function pvGetLinkerArgs( _
+            oMachine As cTargetMachine, _
+            cObjFiles As Collection, _
+            sOutFile As String, _
+            Optional ByVal bDebug As Boolean) As String
+    Dim cOutput         As Collection
+    Dim sRuntimePath    As String
+    Dim vElem           As Variant
+    
+    Set cOutput = New Collection
+    Select Case oMachine.ObjectFormat
+    Case LLVMObjectFormatCOFF
+        cOutput.Add "-nologo"
+        If bDebug Then
+            cOutput.Add "-debug"
+        End If
+        Select Case oMachine.ArchTypeName
+        Case "i386"
+            cOutput.Add "-machine:x86"
+        Case "x86_64"
+            cOutput.Add "-machine:x64"
+        Case "aarch64"
+            cOutput.Add "-machine:arm"
+        End Select
+        cOutput.Add "-subsystem:console,4.0"
+        cOutput.Add "-nodefaultlib"
+        cOutput.Add "-entry:__runtime_main"
+        cOutput.Add "-out:" & sOutFile
+        sRuntimePath = CanonicalPath(PathCombine(App.Path, IIf(InIde, "..\bin\", vbNullString) & "lib\coff\" & oMachine.ArchTypeName))
+        If Not FileExists(sRuntimePath) Then
+            Err.Raise vbObjectError, , "Runtime not found at " & sRuntimePath
+        End If
+        cOutput.Add PathCombine(sRuntimePath, "kernel32.lib")
+        cOutput.Add PathCombine(sRuntimePath, "startup.obj")
+        For Each vElem In cObjFiles
+            cOutput.Add vElem
+        Next
+    Case LLVMObjectFormatELF
+        cOutput.Add "--gc-sections"
+        cOutput.Add "-static"
+        cOutput.Add "-o"
+        cOutput.Add sOutFile
+        For Each vElem In cObjFiles
+            cOutput.Add vElem
+        Next
+        sRuntimePath = CanonicalPath(PathCombine(App.Path, IIf(InIde, "..\bin\", vbNullString) & "lib\elf\" & oMachine.ArchTypeName))
+        If Not FileExists(sRuntimePath) Then
+            Err.Raise vbObjectError, , "Runtime not found at " & sRuntimePath
+        End If
+        cOutput.Add PathCombine(sRuntimePath, "cbits.o")
+'        cOutput.Add "--start-group"
+'        cOutput.Add "-lgcc"
+'        cOutput.Add "-lgcc_eh"
+'        cOutput.Add "-lc"
+'        cOutput.Add "-lm"
+'        cOutput.Add "--end-group"
+    Case Else
+        Err.Raise vbObjectError, , "Object format '" & oMachine.ObjectFormat & "' not supported by linker"
+    End Select
+    cOutput.Add vbNullString
+    pvGetLinkerArgs = ConcatCollection(cOutput, vbNullChar)
+End Function
+
+Private Function pvGetObjFileExt(ByVal eType As LLVMObjectFormatType) As String
+    pvGetObjFileExt = IIf(eType = LLVMObjectFormatCOFF, "obj", "o")
+End Function
+
+Private Function pvLinkDiagnosticHandler(ByVal ctx As Long, ByVal lMsgPtr As Long, ByVal lSize As Long) As Long
+    ConsoleError "%1" & vbCrLf, ToStringCopy(lMsgPtr, lSize)
+End Function

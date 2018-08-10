@@ -31,6 +31,8 @@ DefObj A-Z
 Private m_sLastError        As String
 Private m_sTriple           As String
 Private m_hMachine          As LLVMTargetMachineRef
+Private m_eObjectFormat     As LLVMObjectFormatType
+Private m_sArchTypeName     As String
 
 '=========================================================================
 ' Properties
@@ -42,6 +44,14 @@ End Property
 
 Property Get Triple() As String
     Triple = m_sTriple
+End Property
+
+Property Get ObjectFormat() As LLVMObjectFormatType
+    ObjectFormat = m_eObjectFormat
+End Property
+
+Property Get ArchTypeName() As String
+    ArchTypeName = m_sArchTypeName
 End Property
 
 '=========================================================================
@@ -71,6 +81,12 @@ Public Function Init(sTriple As String, Optional ByVal IsJIT As Boolean) As Bool
     If m_hMachine = 0 Then
         m_sLastError = "LLVMCreateTargetMachine failed for " & sTriple
         GoTo QH
+    End If
+    m_eObjectFormat = LLVMGetObjectFormatFromTriple(m_sTriple)
+    '-- ToDo: impl in VBLLVM.dll
+    m_sArchTypeName = LCase$(At(Split(m_sTriple, "-"), 0))
+    If m_sArchTypeName <> "x86_64" And m_sArchTypeName <> "aarch64" Then
+        m_sArchTypeName = "i386"
     End If
     '--- success
     Init = True
