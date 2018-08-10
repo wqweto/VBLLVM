@@ -21,6 +21,7 @@ library VBLLVM
     typedef [public] LONG LLVMMemoryManagerAllocateDataSectionCallback; // callback
     typedef [public] LONG LLVMMemoryManagerFinalizeMemoryCallback; // callback
     typedef [public] LONG LLVMMemoryManagerDestroyCallback; // callback
+    typedef [public] LONG LLVMLLDLinkDiagnosticHandler; // callback
 /*   typedef [public] LONG llvm_lto_t; // not used
 */
 /*   typedef [public] LONG lto_bool_t; // not used
@@ -392,6 +393,14 @@ library VBLLVM
         LLVMLinkerPreserveSource_Removed = 1,
     } LLVMLinkerMode; // not used
 */
+    typedef enum {
+        LLVMObjectFormat_Unknown,
+        LLVMObjectFormatCOFF,
+        LLVMObjectFormatELF,
+        LLVMObjectFormatMachO,
+        LLVMObjectFormatWasm,
+    } LLVMObjectFormatType;
+
 /*  typedef enum {
         LLVM_LTO_UNKNOWN,
         LLVM_LTO_OPT_SUCCESS,
@@ -3138,6 +3147,12 @@ library VBLLVM
                 LLVMBool LLVMLinkModules2(
                         [in] LLVMModuleRef Dest,
                         [in] LLVMModuleRef Src);
+        [entry("LLVMLLDLink")]
+                LLVMBool LLVMLLDLink(
+                        [in] LLVMObjectFormatType ObjFormat,
+                        [in] LPSTR ArgsMultiSz,
+                        [in] LLVMLLDLinkDiagnosticHandler Handler,
+                        [in] LONG DiagnosticContext);
         [entry("LLVMCreateObjectFile")]
                 LLVMObjectFileRef LLVMCreateObjectFile(
                         [in] LLVMMemoryBufferRef MemBuf);
