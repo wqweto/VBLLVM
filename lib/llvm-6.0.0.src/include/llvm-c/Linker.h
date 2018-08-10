@@ -34,6 +34,19 @@ typedef enum {
 */
 LLVMBool LLVM_STDCALL LLVMLinkModules2(LLVMModuleRef Dest, LLVMModuleRef Src);
 
+typedef enum {
+    LLVMObjectFormat_Unknown,
+    LLVMObjectFormatCOFF,
+    LLVMObjectFormatELF,
+    LLVMObjectFormatMachO,
+    LLVMObjectFormatWasm
+} LLVMObjectFormatType;
+
+typedef void (LLVM_STDCALL *LLVMLLDLinkDiagnosticHandler)(void *Ctx, const char *Msg, size_t MsgSize);
+
+LLVMBool LLVM_STDCALL LLVMLLDLink(LLVMObjectFormatType ObjFormat, const char *ArgsMultiSz, 
+                                  LLVMLLDLinkDiagnosticHandler Handler, void *DiagnosticContext);
+
 #ifdef __cplusplus
 }
 #endif

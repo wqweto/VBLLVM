@@ -12,4 +12,5 @@ echo   LLVMInitializeAllDisassemblers=_VBLLVMInitializeAllDisassemblers@0 >> VBL
 echo   LLVMInitializeNativeTarget=_VBLLVMInitializeNativeTarget@0 >> VBLLVM.def
 echo   LLVMInitializeNativeAsmParser=_VBLLVMInitializeNativeAsmParser@0 >> VBLLVM.def
 echo   LLVMInitializeNativeAsmPrinter=_VBLLVMInitializeNativeAsmPrinter@0 >> VBLLVM.def
-echo   LLVMInitializeNativeDisassembler=_VBLLVMInitializeNativeDisassembler@0  >> VBLLVM.def
+echo   LLVMInitializeNativeDisassembler=_VBLLVMInitializeNativeDisassembler@0 >> VBLLVM.def
+echo   LLVMLLDLink=_LLVMLLDLink@16 >> VBLLVM.def

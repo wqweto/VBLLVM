@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <llvm-c/Target.h>
 
-// Libraries
+// LLVM libs
 #pragma comment(lib, "LLVMAnalysis.lib")
 #pragma comment(lib, "LLVMAsmParser.lib")
 #pragma comment(lib, "LLVMAsmPrinter.lib")
@@ -60,6 +60,17 @@
 #pragma comment(lib, "LLVMX86Info.lib")
 #pragma comment(lib, "LLVMX86Utils.lib")
 #pragma comment(lib, "LLVMXRay.lib")
+// lld libs
+#pragma comment(lib, "lldCOFF.lib")
+#pragma comment(lib, "lldCommon.lib")
+#pragma comment(lib, "lldCore.lib")
+#pragma comment(lib, "lldDriver.lib")
+#pragma comment(lib, "lldELF.lib")
+#pragma comment(lib, "lldMachO.lib")
+#pragma comment(lib, "lldMinGW.lib")
+#pragma comment(lib, "lldReaderWriter.lib")
+#pragma comment(lib, "lldWasm.lib")
+#pragma comment(lib, "lldYAML.lib")
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

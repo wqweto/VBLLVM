@@ -840,3 +840,4 @@ EXPORTS
   LLVMInitializeNativeAsmParser=_VBLLVMInitializeNativeAsmParser@0 
   LLVMInitializeNativeAsmPrinter=_VBLLVMInitializeNativeAsmPrinter@0 
   LLVMInitializeNativeDisassembler=_VBLLVMInitializeNativeDisassembler@0  
+  LLVMLLDLink=_LLVMLLDLink@16
