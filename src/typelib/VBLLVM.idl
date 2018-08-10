@@ -3153,6 +3153,9 @@ library VBLLVM
                         [in] LPSTR ArgsMultiSz,
                         [in] LLVMLLDLinkDiagnosticHandler Handler,
                         [in] LONG DiagnosticContext);
+        [entry("LLVMGetObjectFormatFromTriple")]
+                LLVMObjectFormatType LLVMGetObjectFormatFromTriple(
+                        [in] LPSTR Triple);
         [entry("LLVMCreateObjectFile")]
                 LLVMObjectFileRef LLVMCreateObjectFile(
                         [in] LLVMMemoryBufferRef MemBuf);

@@ -1,5 +1,6 @@
 #include <llvm-c/Linker.h>
 #include <llvm/Target/TargetMachine.h>
+#include <llvm/ADT/Triple.h>
 
 #include <lld/Common/Driver.h>
 
@@ -39,7 +40,7 @@ LLVMBool LLVM_STDCALL LLVMLLDLink(LLVMObjectFormatType ObjFormat, const char *Ar
 
     while (*ArgsMultiSz) {
         if (count >= _countof(args))
-            return 0;
+            llvm_unreachable("too many args");
         args[count++] = ArgsMultiSz;
         ArgsMultiSz += strlen(ArgsMultiSz) + 1;
     }
@@ -47,7 +48,7 @@ LLVMBool LLVM_STDCALL LLVMLLDLink(LLVMObjectFormatType ObjFormat, const char *Ar
     MyOStream diag(Handler, DiagnosticContext);
     switch (ObjFormat) {
     case Triple::UnknownObjectFormat:
-        assert(false); // unreachable
+        return 0;
     case Triple::COFF:
         return lld::coff::link(array_ref_args, false, diag);
     case Triple::ELF:
@@ -57,5 +58,11 @@ LLVMBool LLVM_STDCALL LLVMLLDLink(LLVMObjectFormatType ObjFormat, const char *Ar
     case Triple::Wasm:
         return lld::wasm::link(array_ref_args, false, diag);
     }
-    return 0;
+    llvm_unreachable("unknown object format");
+}
+
+LLVMObjectFormatType LLVM_STDCALL LLVMGetObjectFormatFromTriple(const char *Triple)
+{
+    llvm::Triple triple(Triple);
+    return (LLVMObjectFormatType)triple.getObjectFormat();
 }

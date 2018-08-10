@@ -14,3 +14,4 @@ echo   LLVMInitializeNativeAsmParser=_VBLLVMInitializeNativeAsmParser@0 >> VBLLV
 echo   LLVMInitializeNativeAsmPrinter=_VBLLVMInitializeNativeAsmPrinter@0 >> VBLLVM.def
 echo   LLVMInitializeNativeDisassembler=_VBLLVMInitializeNativeDisassembler@0 >> VBLLVM.def
 echo   LLVMLLDLink=_LLVMLLDLink@16 >> VBLLVM.def
+echo   LLVMGetObjectFormatFromTriple=_LLVMGetObjectFormatFromTriple@4 >> VBLLVM.def

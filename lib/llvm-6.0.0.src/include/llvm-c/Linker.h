@@ -46,6 +46,8 @@ typedef void (LLVM_STDCALL *LLVMLLDLinkDiagnosticHandler)(void *Ctx, const char 
 
 LLVMBool LLVM_STDCALL LLVMLLDLink(LLVMObjectFormatType ObjFormat, const char *ArgsMultiSz, 
                                   LLVMLLDLinkDiagnosticHandler Handler, void *DiagnosticContext);
+                                  
+LLVMObjectFormatType LLVM_STDCALL LLVMGetObjectFormatFromTriple(const char *Triple);
 
 #ifdef __cplusplus
 }
