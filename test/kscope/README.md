@@ -13,17 +13,22 @@ This batch file needs `vbpeg.exe` from [VbPeg project](https://github.com/wqweto
 ### Command line
 
     C:> kscope.exe
-    kscope VB6 port 0.1, i686-pc-windows-msvc (c) 2018 by wqweto@gmail.com (7.8.2018 12:25:28)
+    kscope VB6 port 0.2, i686-pc-windows-msvc (c) 2018 by wqweto@gmail.com (7.8.2018 12:25:28)
 
     Usage: kscope.exe [options] <in_file.ks>
 
     Options:
       -o OUTFILE      write result to OUTFILE [default: stdout]
-      -c, -emit-obj   compile to COFF .obj file only [default: exe]
+      -c, -emit-obj   compile to object file only [default: exe]
       -m32            compile for win32 target [default: x64]
+      -O NUM          optimization level [default: none]
+      -Os -Oz         optimize for size
       -emit-tree      output parse tree
       -emit-llvm      output intermediate represetation
+      -target TRIPLE  cross-compile to target OS/CPU
       -q              in quiet operation outputs only errors
       -nologo         suppress startup banner
       -version        dump available targets
     If no -emit-xxx is used emits executable. If no -o is used writes result to console.
+    
+Valid targets include `i686-pc-windows-msvc`, `x86_64-pc-windows-msvc`, `i686-unknown-linux-gnu`, `x86_64-unknown-linux-gnu`, etc.
