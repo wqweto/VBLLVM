@@ -89,7 +89,7 @@ Private Function Process(vArgs As Variant) As Long
         ConsoleError "Options:" & vbCrLf & _
             "  -o OUTFILE      write result to OUTFILE [default: stdout]" & vbCrLf & _
             "  -c, -emit-obj   compile to object file only [default: exe]" & vbCrLf & _
-            "  -m32            compile for win32 target [default: x64]" & vbCrLf & _
+            "  -m32            compile for i386 target [default: x86_64]" & vbCrLf & _
             "  -O NUM          optimization level [default: none]" & vbCrLf & _
             "  -Os -Oz         optimize for size" & vbCrLf & _
             "  -emit-tree      output parse tree" & vbCrLf & _
@@ -210,7 +210,7 @@ Private Function Process(vArgs As Variant) As Long
                 sOutFile = vbNullString
             ElseIf LenB(sOutFile) <> 0 Then
                 For lJdx = 1 To 1000
-                    sObjFile = PathCombine(sObjPath, oCodegen.ModuleName & IIf(lJdx > 1, lJdx, vbNullString) & "." & pvGetObjFileExt(oMachine.ObjectFormat))
+                    sObjFile = PathCombine(sObjPath, oCodegen.ModuleName & IIf(lJdx > 1, lJdx, vbNullString) & "." & GetObjFileExt(oMachine.ObjectFormat))
                     If Not FileExists(sObjFile) Then
                         Exit For
                     End If
@@ -292,6 +292,7 @@ Private Function pvGetLinkerArgs( _
     Dim vElem           As Variant
     
     Set cOutput = New Collection
+    cOutput.Add "lld"
     Select Case oMachine.ObjectFormat
     Case LLVMObjectFormatCOFF
         cOutput.Add "-nologo"
@@ -345,8 +346,8 @@ Private Function pvGetLinkerArgs( _
     pvGetLinkerArgs = ConcatCollection(cOutput, vbNullChar)
 End Function
 
-Private Function pvGetObjFileExt(ByVal eType As LLVMObjectFormatType) As String
-    pvGetObjFileExt = IIf(eType = LLVMObjectFormatCOFF, "obj", "o")
+Public Function GetObjFileExt(ByVal eType As LLVMObjectFormatType) As String
+    GetObjFileExt = IIf(eType = LLVMObjectFormatCOFF, "obj", "o")
 End Function
 
 Private Function pvLinkDiagnosticHandler(ByVal ctx As Long, ByVal lMsgPtr As Long, ByVal lSize As Long) As Long

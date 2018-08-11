@@ -188,7 +188,7 @@ Public Function EmitToFile(sFile As String) As Boolean
         GoTo QH
     End If
     If LenB(sFile) = 0 Then
-        sFile = m_sModuleName & ".obj"
+        sFile = m_sModuleName & "." & GetObjFileExt(m_oMachine.ObjectFormat)
     End If
     If LLVMTargetMachineEmitToFile(hMachine, hModule, sFile, LLVMObjectFile, lMsgPtr) <> 0 Then
         m_sLastError = ToString(lMsgPtr)
@@ -231,7 +231,7 @@ Public Function VisitDef(oNode As Scripting.Dictionary, hResult As LLVMValueRef)
         GoTo QH
     End If
     Call LLVMBuildRet(m_hBuilder, hBody)
-    If LLVMVerifyFunction(hFunc, LLVMPrintMessageAction) = 1 Then
+    If LLVMVerifyFunction(hFunc, LLVMPrintMessageAction) <> 0 Then
         Call LLVMDeleteFunction(hFunc)
         GoTo QH
     End If
@@ -517,8 +517,10 @@ Public Function VisitVarExpr(oNode As Scripting.Dictionary, hResult As LLVMValue
             If Not CodeGenNode(JsonItem(oNode, "Vars/" & lIdx & "/Expr"), hInit) Then
                 GoTo QH
             End If
-            Call LLVMBuildStore(m_hBuilder, hInit, hAlloca)
+        Else
+            hInit = LLVMConstReal(LLVMDoubleType(), 0)
         End If
+        Call LLVMBuildStore(m_hBuilder, hInit, hAlloca)
         oScope.Item(JsonItem(oNode, "Vars/" & lIdx & "/Name")) = hAlloca
     Next
     pvScopePush oScope
