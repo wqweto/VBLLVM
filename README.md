@@ -26,3 +26,7 @@ Finally use `lib/llvm-install-release/lib/dump-def.bat` to collect exports for `
 Use `src/VBLLVM.sln` to build `bin/release/VBLLVM.dll` and `bin/debug/VBLLVM.dll` from `.lib` files in `lib/llvm-install-release`;`lib/lld-install-release` and `lib/llvm-install-debug`;`lib/lld-install-debug`.
 
 Finally use `src/typelib/build.bat` to build `bin/typelib/VBLLVM.tlb` from `lib/llvm-6.0.0.src/include/llvm-c` and `src/VBLLVM.def`
+
+### Samples
+
+ - LLVM's Kaleidoscope toy language VB6 port is in `test/kscope`
