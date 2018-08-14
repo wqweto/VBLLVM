@@ -7,8 +7,10 @@
 *.cobj -text
 *.tlb -text
 *.lib -text
-*.o -text
 *.obj -text
+*.o -text
+*.so -text
+*.a -text
 
 # generated
 mdParser.bas -diff
