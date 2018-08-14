@@ -1,12 +1,12 @@
-### Compile runtime
+### How to compile kscope runtimes
 
-The batch `build.bat` depends on `%ProgramFiles(x86)%\LLVM\bin\clang.exe` being installed beforehand. You can adjust the path in the batch if needed.
+The `build.bat` depends on clang being installed in `%ProgramFiles(x86)%\LLVM` beforehand but you can adjust the path to the compiler if different.
 
-Runtime build compiles all runties (windows/linux and i386/x86_64) to `bin/lib/<os>/<arch>` output folders.
+The `build.bat` tries to compile runtimes for all targets (windows/linux + i386/x86_64) to their resepective `bin/lib/<os>/<arch>` output folders.
 
-### Compile linux runtime under WSL
+### Hot to compile runtimes for linux targets under WSL
 
-This is an alternative build for the linux runtime. Note: this step is not needed anymore
+This is an alternative build for the linux runtime. Note that this step is not needed anymore.
 
     $ gcc -m32 -c cbits.c -o ../../bin/lib/linux/i386/cbits.o
     $ gcc -c cbits.c -o ../../bin/lib/linux/x86_64/cbits.o
