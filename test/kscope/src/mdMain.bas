@@ -23,7 +23,7 @@ Private Declare Function DeleteFile Lib "kernel32" Alias "DeleteFileA" (ByVal lp
 ' Constants and member variables
 '=========================================================================
 
-Private Const STR_VERSION           As String = "0.2"
+Private Const STR_VERSION           As String = "0.3"
 
 Private m_oParser               As cParser
 Private m_oOpt                  As Scripting.Dictionary
