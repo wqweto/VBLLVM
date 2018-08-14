@@ -77,7 +77,7 @@ Public Function Init(oTree As Object, oMachine As cTargetMachine, sModuleName As
     End If
     '--- setup current scope
     Set m_oModuleScope = New Scripting.Dictionary
-    Set m_oLocalScope = m_oLocalScope
+    Set m_oLocalScope = m_oModuleScope
     '--- success
     Init = True
 QH:
