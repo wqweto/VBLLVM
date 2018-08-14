@@ -227,7 +227,7 @@ Private Function Process(vArgs As Variant) As Long
     If cObjFiles.Count > 0 Then
         Call DeleteFile(sOutFile)
         If LLVMLLDLink(oMachine.ObjectFormat, pvGetLinkerArgs(oMachine, cObjFiles, sOutFile), AddressOf pvLinkDiagnosticHandler, 0) = 0 Then
-            '--- link error
+            Debug.Print "INFO: Probably linker error"
         End If
         If FileExists(sOutFile) And Not m_oOpt.Item("-q") Then
             ConsoleError "File %1 emitted successfully" & vbCrLf, sOutFile
@@ -311,7 +311,7 @@ Private Function pvGetLinkerArgs( _
         cOutput.Add "-nodefaultlib"
         cOutput.Add "-entry:__runtime_main"
         cOutput.Add "-out:" & sOutFile
-        sRuntimePath = CanonicalPath(PathCombine(App.Path, IIf(InIde, "..\bin\", vbNullString) & "lib\coff\" & oMachine.ArchTypeName))
+        sRuntimePath = CanonicalPath(PathCombine(App.Path, IIf(InIde, "..\bin\", vbNullString) & "lib\windows\" & oMachine.ArchTypeName))
         If Not FileExists(sRuntimePath) Then
             Err.Raise vbObjectError, , "Runtime not found at " & sRuntimePath
         End If
@@ -321,24 +321,30 @@ Private Function pvGetLinkerArgs( _
             cOutput.Add vElem
         Next
     Case LLVMObjectFormatELF
-        cOutput.Add "--gc-sections"
-        cOutput.Add "-static"
-        cOutput.Add "-o"
-        cOutput.Add sOutFile
-        For Each vElem In cObjFiles
-            cOutput.Add vElem
-        Next
-        sRuntimePath = CanonicalPath(PathCombine(App.Path, IIf(InIde, "..\bin\", vbNullString) & "lib\elf\" & oMachine.ArchTypeName))
+        sRuntimePath = CanonicalPath(PathCombine(App.Path, IIf(InIde, "..\bin\", vbNullString) & "lib\linux\" & oMachine.ArchTypeName))
         If Not FileExists(sRuntimePath) Then
             Err.Raise vbObjectError, , "Runtime not found at " & sRuntimePath
         End If
+        cOutput.Add "-dynamic-linker"
+        If oMachine.ArchTypeName = "i386" Then
+            cOutput.Add "/lib/ld-linux.so.2"
+        Else
+            cOutput.Add "/lib64/ld-linux-x86-64.so.2"
+        End If
+        If Not bDebug Then
+            cOutput.Add "-s" '--- strip debug info
+        End If
+        cOutput.Add "-o"
+        cOutput.Add sOutFile
+        cOutput.Add "-e"
+        cOutput.Add "_start"
+        cOutput.Add "-Bdynamic"
+        cOutput.Add PathCombine(sRuntimePath, "libc.so")
+        cOutput.Add PathCombine(sRuntimePath, "Scrt1.o")
         cOutput.Add PathCombine(sRuntimePath, "cbits.o")
-'        cOutput.Add "--start-group"
-'        cOutput.Add "-lgcc"
-'        cOutput.Add "-lgcc_eh"
-'        cOutput.Add "-lc"
-'        cOutput.Add "-lm"
-'        cOutput.Add "--end-group"
+        For Each vElem In cObjFiles
+            cOutput.Add vElem
+        Next
     Case Else
         Err.Raise vbObjectError, , "Object format '" & oMachine.ObjectFormat & "' not supported by linker"
     End Select
